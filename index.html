@@ -293,7 +293,7 @@ let S = {
   nome: '', email: '', turma: '', ano: '', senha: '', xp: 0,
   philoAbertos: [], tlRevelados: [], notaOk: false,
   checkDone: [], unlocked: [1], tela: 1,
-  hist: [], enigResp: []
+  hist: [], enigResp: [], dmFinalizado: false
 };
 
 const NIVEIS = [{n:1,nome:'Colono',av:'🧑‍🌾',min:0,max:200},{n:2,nome:'Artesão',av:'🔨',min:200,max:500},{n:3,nome:'Explorador',av:'🧭',min:500,max:900},{n:4,nome:'Patriota',av:'⚔️',min:900,max:1400},{n:5,nome:'Fundador',av:'🏛️',min:1400,max:9999}];
@@ -480,7 +480,7 @@ function fazerCadastro() {
   iniciarApp();
   log('Cadastro realizado');
 }
-function iniciarApp() { document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) document.getElementById('check-nota')&&(document.getElementById('check-nota').checked=true); salvarLocal(); }
+function iniciarApp() { document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) document.getElementById('check-nota')&&(document.getElementById('check-nota').checked=true); salvarLocal(); }
 function sair() { document.getElementById('app-page').classList.remove('visivel'); document.getElementById('login-page').classList.remove('oculto'); irPagina('pg-login'); }
 function toggleNav() { document.getElementById('sidebar').classList.toggle('aberto'); document.getElementById('overlay-nav').classList.toggle('aberto'); }
 function fecharNav() { document.getElementById('sidebar').classList.remove('aberto'); document.getElementById('overlay-nav').classList.remove('aberto'); }
@@ -494,7 +494,7 @@ function loginProf() { let s=document.getElementById('f-prof').value; if(s===PRO
 function avancarParaAprofundamento() { if(!S.unlocked.includes(5))S.unlocked.push(5); irPara(5); }
 function avancarParaDestinoManifesto() { if(!S.unlocked.includes(6))S.unlocked.push(6); irPara(6); }
 function verificarLacunas() { let lacunas=document.querySelectorAll('.lacuna'), acertos=0; lacunas.forEach(l=>{ if(l.textContent.trim().toLowerCase()===l.getAttribute('data-resp').toLowerCase()){ l.classList.add('correta'); acertos++; } else { l.classList.add('errada'); l.textContent=l.getAttribute('data-resp'); } }); if(acertos>0) S.xp+=Math.round(40*acertos/lacunas.length); atualizarHUD(); salvarLocal(); }
-function finalizarAtividadeDM() { let r=document.getElementById('resultado-dm'); r.style.display='block'; r.innerHTML=`<h2>Resultado Final</h2><div>⭐⭐⭐</div><div>${document.querySelectorAll('.lacuna.correta').length} / ${document.querySelectorAll('.lacuna').length} pts</div><p>Parabéns!</p>`; S.xp+=100; atualizarHUD(); salvarLocal(); }
+function finalizarAtividadeDM() { if(S.dmFinalizado) return; S.dmFinalizado=true; let r=document.getElementById('resultado-dm'); r.style.display='block'; r.innerHTML=`<h2>Resultado Final</h2><div>⭐⭐⭐</div><div>${document.querySelectorAll('.lacuna.correta').length} / ${document.querySelectorAll('.lacuna').length} pts</div><p>Parabéns!</p>`; document.querySelector('.btn-finalizar-dm').disabled=true; document.querySelector('.btn-finalizar-dm').style.opacity='0.4'; S.xp+=100; atualizarHUD(); salvarLocal(); }
 </script>
 </body>
 </html>
