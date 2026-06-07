@@ -665,7 +665,7 @@ function carregarPainelAlunos() {
 }
 function avancarParaAprofundamento() { if(!S.unlocked.includes(5))S.unlocked.push(5); irPara(5); }
 function avancarParaDestinoManifesto() { if(!S.unlocked.includes(6))S.unlocked.push(6); irPara(6); }
-function verificarLacunas() { let lacunas=document.querySelectorAll('.lacuna'), acertos=0; lacunas.forEach(l=>{ if(l.textContent.trim().toLowerCase()===l.getAttribute('data-resp').toLowerCase()){ l.classList.add('correta'); acertos++; } else { l.classList.add('errada'); l.textContent=l.getAttribute('data-resp'); } }); if(acertos>0) S.xp+=Math.round(40*acertos/lacunas.length); atualizarHUD(); salvarLocal(); }
+function verificarLacunas() { let btn=document.querySelector('.btn-verificar'); if(btn&&btn.disabled) return; let lacunas=document.querySelectorAll('.lacuna'), acertos=0; lacunas.forEach(l=>{ if(l.textContent.trim().toLowerCase()===l.getAttribute('data-resp').toLowerCase()){ l.classList.add('correta'); acertos++; } else { l.classList.add('errada'); l.textContent=l.getAttribute('data-resp'); } }); if(acertos>0) S.xp+=Math.round(40*acertos/lacunas.length); atualizarHUD(); salvarLocal(); if(btn){ btn.disabled=true; btn.style.opacity='0.4'; btn.style.cursor='not-allowed'; } }
 function finalizarAtividadeDM() { if(S.dmFinalizado) return; S.dmFinalizado=true; let r=document.getElementById('resultado-dm'); r.style.display='block'; r.innerHTML=`<h2>Resultado Final</h2><div>⭐⭐⭐</div><div>${document.querySelectorAll('.lacuna.correta').length} / ${document.querySelectorAll('.lacuna').length} pts</div><p>Parabéns!</p>`; document.querySelector('.btn-finalizar-dm').disabled=true; document.querySelector('.btn-finalizar-dm').style.opacity='0.4'; S.xp+=100; atualizarHUD(); salvarLocal(); }
 </script>
 </body>
