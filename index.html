@@ -278,7 +278,9 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
   </div>
 </div>
 
-<div id="painel"><div class="painel-hdr"><div class="painel-titulo">PAINEL DO PROFESSOR</div><button class="painel-fechar" onclick="fecharPainel()">FECHAR</button></div><div id="painel-login-wrap"><div class="painel-login-box"><h3>ACESSO RESTRITO</h3><div class="campo"><label>SENHA</label><input type="password" id="f-prof" placeholder="Senha do professor"></div><button class="btn-verde" onclick="loginProf()">ENTRAR</button><div id="msg-prof"></div></div></div><div id="painel-dados" style="display:none;"><div class="painel-grid" id="painel-grid"></div></div></div>
+<div id="painel"><div class="painel-hdr"><div class="painel-titulo">PAINEL DO PROFESSOR</div><button class="painel-fechar" onclick="fecharPainel()">FECHAR</button></div><div id="painel-login-wrap"><div class="login-box" style="max-width:390px;margin:2rem auto;"><div class="login-titulo">🔑 ACESSO DO PROFESSOR</div><div class="login-sub">EMF Soares de Barros — Cívico Militar</div><div class="campo"><label>E-MAIL</label><input type="email" id="f-prof-email" placeholder="seu@email.com"></div><div class="campo"><label>SENHA</label><input type="password" id="f-prof-senha" placeholder="Senha do professor"></div><button class="btn-verde" onclick="loginProf()">▶ ENTRAR</button><div id="msg-prof" class="login-msg"></div></div></div><div id="painel-dados" style="display:none;"><div class="painel-grid" id="painel-grid"></div></div></div>
+
+<div class="modal-fundo" id="modal-zerar-aluno"><div class="modal-caixa"><span>⚠️</span><div class="modal-titulo">CONFIRMAR EXCLUSÃO</div><p id="modal-zerar-desc">Zerando percurso...</p><div class="campo" style="margin-top:1rem;"><label>CONFIRME A SENHA DO PROFESSOR</label><input type="password" id="modal-zerar-senha" placeholder="Senha"></div><div id="modal-zerar-msg" class="login-msg" style="margin-bottom:.5rem;"></div><div class="modal-btns"><button class="btn-sim" onclick="executarZerar()">Confirmar</button><button class="btn-não" onclick="fecharModal('modal-zerar-aluno')">Cancelar</button></div></div></div>
 
 <div class="modal-fundo" id="modal-reinicio"><div class="modal-caixa"><span>🔄</span><div class="modal-titulo">RECOMEÇAR?</div><p>Todo progresso será apagado.</p><div class="modal-btns"><button class="btn-sim" onclick="executarReinicio()">Sim</button><button class="btn-não" onclick="fecharModal('modal-reinicio')">Cancelar</button></div></div></div>
 <div class="modal-fundo" id="modal-hist"><div class="modal-caixa"><div style="display:flex;justify-content:space-between;"><span>HISTÓRICO</span><button onclick="fecharModal('modal-hist')" style="background:none;border:none;color:white;">x</button></div><div id="hist-lista"></div></div></div>
@@ -287,8 +289,23 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
 
 <script>
 // ========== CONFIGURAÇÃO GLOBAL OTIMIZADA ==========
-const PROF_SENHA = 'Vanilson2025';
+const PROF_EMAIL = 'vcardoso@prof.smed.ijui.rs.gov.br';
+const PROF_SENHA = '836@12vC';
 const CHAVE_AUTH = 'mc_oda_auth_';
+const ODA_VERSION = 'v3-proflogin';
+
+// Limpeza automática de versão: remove todos os usuários antigos na primeira carga desta versão
+(function() {
+  if(localStorage.getItem('oda_version')!==ODA_VERSION) {
+    let toRemove=[];
+    for(let i=0;i<localStorage.length;i++){
+      let k=localStorage.key(i);
+      if(k&&k.startsWith(CHAVE_AUTH)) toRemove.push(k);
+    }
+    toRemove.forEach(k=>localStorage.removeItem(k));
+    localStorage.setItem('oda_version',ODA_VERSION);
+  }
+})();
 
 let S = {
   nome: '', email: '', turma: '', ano: '', senha: '', xp: 0,
@@ -473,6 +490,7 @@ function fazerCadastro() {
   let senha=document.getElementById('c-senha').value;
   let senha2=document.getElementById('c-senha2').value;
   if(!nome||!email||!turma||!senha){document.getElementById('msg-cadastro').textContent='Preencha todos os campos';return;}
+  if(email.trim().toLowerCase()===PROF_EMAIL){document.getElementById('msg-cadastro').textContent='E-mail não permitido para alunos';return;}
   if(senha!==senha2){document.getElementById('msg-cadastro').textContent='Senhas não conferem';return;}
   if(senha.length<4){document.getElementById('msg-cadastro').textContent='Senha deve ter pelo menos 4 caracteres';return;}
   if(localStorage.getItem(CHAVE_AUTH+email.toLowerCase())){document.getElementById('msg-cadastro').textContent='E-mail já cadastrado';return;}
@@ -492,15 +510,58 @@ function verHistórico() { document.getElementById('hist-lista').innerHTML=S.his
 function abrirPainel() { document.getElementById('painel').classList.add('aberto'); }
 function fecharPainel() { document.getElementById('painel').classList.remove('aberto'); }
 function loginProf() {
-  let s=document.getElementById('f-prof').value;
-  if(s!==PROF_SENHA){ document.getElementById('msg-prof').textContent='Senha incorreta!'; return; }
+  let email=document.getElementById('f-prof-email').value.trim().toLowerCase();
+  let s=document.getElementById('f-prof-senha').value;
+  if(!email||!s){document.getElementById('msg-prof').textContent='Preencha todos os campos';return;}
+  if(email!==PROF_EMAIL||s!==PROF_SENHA){ document.getElementById('msg-prof').textContent='E-mail ou senha incorretos!'; return; }
   document.getElementById('painel-login-wrap').style.display='none';
   document.getElementById('painel-dados').style.display='block';
+  carregarPainelAlunos();
+}
 
+let _zerarAlvo=null; // null = turma toda; string email = aluno específico; string turma = turma específica
+let _zerarTipo=null; // 'aluno' | 'turma' | 'todos'
+
+function abrirModalZerar(tipo, alvo, desc) {
+  _zerarTipo=tipo; _zerarAlvo=alvo;
+  document.getElementById('modal-zerar-desc').textContent=desc;
+  document.getElementById('modal-zerar-senha').value='';
+  document.getElementById('modal-zerar-msg').textContent='';
+  document.getElementById('modal-zerar-aluno').classList.add('aberto');
+}
+
+function executarZerar() {
+  let s=document.getElementById('modal-zerar-senha').value;
+  if(s!==PROF_SENHA){document.getElementById('modal-zerar-msg').textContent='Senha incorreta!';document.getElementById('modal-zerar-msg').className='login-msg err';return;}
+  let keys=[];
+  for(let i=0;i<localStorage.length;i++){
+    let k=localStorage.key(i);
+    if(k&&k.startsWith(CHAVE_AUTH)) keys.push(k);
+  }
+  keys.forEach(k=>{
+    let email=k.replace(CHAVE_AUTH,'');
+    if(email===PROF_EMAIL) return; // nunca apaga o professor
+    try{
+      let obj=JSON.parse(localStorage.getItem(k));
+      if(_zerarTipo==='aluno' && email!==_zerarAlvo) return;
+      if(_zerarTipo==='turma' && (obj.turma||'')!==_zerarAlvo) return;
+      // zera: reseta progresso mas mantém cadastro
+      obj.xp=0; obj.philoAbertos=[]; obj.tlRevelados=[]; obj.notaOk=false;
+      obj.checkDone=[]; obj.unlocked=[1]; obj.tela=1; obj.hist=[]; obj.enigResp=[]; obj.dmFinalizado=false;
+      localStorage.setItem(k, JSON.stringify(obj));
+    }catch(e){}
+  });
+  fecharModal('modal-zerar-aluno');
+  carregarPainelAlunos();
+}
+
+function carregarPainelAlunos() {
   let alunos=[];
   for(let i=0;i<localStorage.length;i++){
     let k=localStorage.key(i);
-    if(k.startsWith(CHAVE_AUTH)){
+    if(k&&k.startsWith(CHAVE_AUTH)){
+      let email=k.replace(CHAVE_AUTH,'');
+      if(email===PROF_EMAIL) continue; // não exibe professor
       try{ alunos.push(JSON.parse(localStorage.getItem(k))); }catch(e){}
     }
   }
@@ -515,17 +576,26 @@ function loginProf() {
   let turmas={};
   alunos.forEach(a=>{ let t=a.turma||'—'; if(!turmas[t]) turmas[t]=[]; turmas[t].push(a); });
 
-  let html='<div style="margin-bottom:1.5rem;"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:1.2rem;">';
+  let html='<div style="margin-bottom:1rem;">';
+
+  // Botão zerar todos
+  html+='<div style="margin-bottom:1rem;text-align:right;"><button class="btn-verde" style="background:rgba(255,80,80,.2);border-color:#ff5050;font-size:.65rem;padding:.5rem 1rem;" onclick="abrirModalZerar(\'todos\',null,\'Zerar percurso de TODOS os alunos. Esta ação não pode ser desfeita.\')">⚠️ ZERAR TODOS OS ALUNOS</button></div>';
+
+  // Cards por turma com botão de zerar turma
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:1.2rem;">';
   Object.entries(turmas).forEach(([t,al])=>{
     let media=Math.round(al.reduce((s,a)=>s+(a.xp||0),0)/al.length);
     html+='<div style="background:rgba(255,255,255,.07);border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:.8rem;text-align:center;">'
       +'<div style="font-family:\'Press Start 2P\',monospace;font-size:.55rem;color:#c9a84c;margin-bottom:4px;">TURMA '+t+'</div>'
       +'<div style="font-size:1.4rem;font-weight:700;color:#fff;">'+al.length+'</div>'
       +'<div style="font-size:.7rem;color:#aaa;">alunos</div>'
-      +'<div style="font-size:.7rem;color:#80ff00;margin-top:4px;">Média: '+media+' XP</div></div>';
+      +'<div style="font-size:.7rem;color:#80ff00;margin-top:4px;">Média: '+media+' XP</div>'
+      +'<button onclick="abrirModalZerar(\'turma\',\''+t+'\',\'Zerar percurso de toda a turma '+t+'?\')" style="margin-top:.5rem;background:rgba(255,80,80,.2);border:1px solid #ff5050;color:#ff8080;font-size:.55rem;padding:.3rem .5rem;cursor:pointer;border-radius:4px;font-family:\'Press Start 2P\',monospace;">ZERAR TURMA</button>'
+      +'</div>';
   });
   html+='</div>';
 
+  // Tabela de alunos
   html+='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;">'
     +'<thead><tr style="background:rgba(201,168,76,.2);">'
     +'<th style="padding:8px;text-align:left;color:#c9a84c;">#</th>'
@@ -539,11 +609,13 @@ function loginProf() {
     +'<th style="padding:8px;text-align:center;color:#c9a84c;">Enigmas</th>'
     +'<th style="padding:8px;text-align:center;color:#c9a84c;">Checklist</th>'
     +'<th style="padding:8px;text-align:center;color:#c9a84c;">Fase</th>'
+    +'<th style="padding:8px;text-align:center;color:#c9a84c;">Ações</th>'
     +'</tr></thead><tbody>';
 
   alunos.forEach(function(a,i){
     let nv=getNivel(a.xp||0);
     let par=i%2===0?'rgba(255,255,255,.03)':'transparent';
+    let emailEsc=(a.email||'').replace(/'/g,"\\'");
     html+='<tr style="background:'+par+';border-bottom:1px solid rgba(255,255,255,.06);">'
       +'<td style="padding:7px 8px;color:#888;">'+(i+1)+'</td>'
       +'<td style="padding:7px 8px;color:#fff;font-weight:600;">'+(a.nome||'—')+'</td>'
@@ -556,6 +628,7 @@ function loginProf() {
       +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+((a.enigResp||[]).length)+'/4</td>'
       +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+((a.checkDone||[]).length)+'/10</td>'
       +'<td style="padding:7px 8px;text-align:center;color:#c9a84c;">'+Math.max(...(a.unlocked||[1]))+'</td>'
+      +'<td style="padding:7px 8px;text-align:center;"><button onclick="abrirModalZerar(\'aluno\',\''+emailEsc+'\',\'Zerar percurso de '+(a.nome||'este aluno')+'?\')" style="background:rgba(255,80,80,.15);border:1px solid #ff5050;color:#ff8080;font-size:.55rem;padding:.25rem .5rem;cursor:pointer;border-radius:4px;font-family:\'Press Start 2P\',monospace;">ZERAR</button></td>'
       +'</tr>';
   });
   html+='</tbody></table></div></div>';
