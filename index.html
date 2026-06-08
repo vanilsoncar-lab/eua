@@ -534,7 +534,7 @@ function fazerCadastro() {
   iniciarApp();
   log('Cadastro realizado');
 }
-function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) document.getElementById('check-nota')&&(document.getElementById('check-nota').checked=true); salvarLocal(); }
+function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) document.getElementById('check-nota')&&(document.getElementById('check-nota').checked=true); salvarLocal(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
 function sair() { try{ localStorage.removeItem('oda_sessao_ativa'); }catch(e){} document.getElementById('app-page').classList.remove('visivel'); document.getElementById('login-page').classList.remove('oculto'); irPagina('pg-login'); }
 function toggleNav() { document.getElementById('sidebar').classList.toggle('aberto'); document.getElementById('overlay-nav').classList.toggle('aberto'); }
 function fecharNav() { document.getElementById('sidebar').classList.remove('aberto'); document.getElementById('overlay-nav').classList.remove('aberto'); }
@@ -560,6 +560,24 @@ function verPapeis() {
   document.getElementById('papeis-lista').innerHTML=html;
   document.getElementById('modal-papeis').classList.add('aberto');
 }
+
+function abrirBoasvindas() {
+  document.getElementById('bv-nome').textContent = S.nome ? S.nome.split(' ')[0] : 'Aventureiro';
+  let html = NIVEIS.map(n => {
+    let faixa = n.n < NIVEIS.length ? n.min + ' – ' + (n.max-1) + ' XP' : n.min + '+ XP';
+    return '<div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:.55rem .8rem;">'
+      + '<span style="font-size:1.3rem;">' + n.av + '</span>'
+      + '<div><div style="font-family:&quot;Press Start 2P&quot;,monospace;font-size:.55rem;color:#c9a84c;margin-bottom:.2rem;">' + n.nome + '</div>'
+      + '<div style="font-size:.72rem;color:#aaa;margin-bottom:.2rem;">' + faixa + '</div>'
+      + '<div style="font-size:.75rem;color:#d1e3f8;line-height:1.5;">' + n.desc + '</div></div></div>';
+  }).join('');
+  document.getElementById('bv-papeis').innerHTML = html;
+  document.getElementById('modal-boasvindas').classList.add('aberto');
+}
+function fecharBoasvindas() {
+  document.getElementById('modal-boasvindas').classList.remove('aberto');
+}
+
 function abrirPainel() { document.getElementById('painel').classList.add('aberto'); }
 function fecharPainel() { document.getElementById('painel').classList.remove('aberto'); }
 function loginProf() {
@@ -692,5 +710,20 @@ function avancarParaDestinoManifesto() { if(!S.unlocked.includes(6))S.unlocked.p
 function verificarLacunas() { let btn=document.querySelector(".btn-verificar"); if(btn&&btn.disabled) return; let lacunas=document.querySelectorAll(".lacuna"), acertos=0; lacunas.forEach(l=>{ if(l.textContent.trim().toLowerCase()===l.getAttribute("data-resp").toLowerCase()){ l.classList.add("correta"); acertos++; } else { l.classList.add("errada"); l.textContent=l.getAttribute("data-resp"); } }); if(acertos>0) S.xp+=Math.round(40*acertos/lacunas.length); atualizarHUD(); salvarLocal(); if(btn){ btn.disabled=true; btn.style.opacity="0.4"; btn.style.cursor="not-allowed"; } }
 function finalizarAtividadeDM() { if(S.dmFinalizado) return; S.dmFinalizado=true; let r=document.getElementById('resultado-dm'); r.style.display='block'; r.innerHTML=`<h2>Resultado Final</h2><div>⭐⭐⭐</div><div>${document.querySelectorAll('.lacuna.correta').length} / ${document.querySelectorAll('.lacuna').length} pts</div><p>Parabéns!</p>`; document.querySelector('.btn-finalizar-dm').disabled=true; document.querySelector('.btn-finalizar-dm').style.opacity='0.4'; S.xp+=100; atualizarHUD(); salvarLocal(); }
 </script>
+
+<div class="modal-fundo" id="modal-boasvindas" style="z-index:6000;align-items:flex-start;padding-top:0;overflow-y:auto;">
+  <div style="background:linear-gradient(160deg,#0a1628,#0d1f3c);border:2px solid #c9a84c;max-width:480px;width:95%;margin:auto;padding:1.5rem 1.2rem 1.2rem;border-radius:12px;position:relative;max-height:96vh;overflow-y:auto;">
+    <div style="text-align:center;margin-bottom:1.2rem;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:.68rem;color:#c9a84c;line-height:1.8;margin-bottom:.5rem;">🇺🇸 HISTÓRIA GAMIFICADA</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:.6rem;color:#91c7ff;margin-bottom:.9rem;">INDEPENDÊNCIA DOS ESTADOS UNIDOS</div>
+      <p style="font-size:.85rem;color:#d1e3f8;line-height:1.7;margin-bottom:1rem;">Bem-vindo, <strong id="bv-nome" style="color:#c9a84c;"></strong>! Nesta jornada você vai explorar o Iluminismo, a Revolução Americana e seus impactos no mundo. Conforme acumula XP, você avança pelos <strong>8 papéis históricos</strong> abaixo:</p>
+    </div>
+    <div id="bv-papeis" style="display:grid;gap:8px;margin-bottom:1.2rem;"></div>
+    <div style="text-align:center;">
+      <button onclick="fecharBoasvindas()" style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);color:#0d1f3c;border:none;padding:.75rem 2rem;border-radius:30px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:.88rem;cursor:pointer;letter-spacing:.04em;">▶ COMEÇAR A JORNADA</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
