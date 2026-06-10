@@ -236,7 +236,7 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
       <div class="hud-nivel" id="hud-nivel">Nível 1 — Colono</div>
       <div class="hud-barra-w"><div class="hud-barra"><div class="hud-barra-fill" id="hud-fill"></div></div><div class="hud-xp" id="hud-xp">0 XP</div></div>
     </div>
-    
+    <button class="btn-hud" onclick="abrirRanking()" title="Ranking da turma" style="font-size:.9rem;padding:.35rem .55rem;">🏆</button>
   </div>
   <div id="layout">
     <nav id="sidebar">
@@ -430,7 +430,15 @@ let S = {
   nome: '', email: '', turma: '', ano: '', senha: '', xp: 0,
   philoAbertos: [], tlRevelados: [], notaOk: false,
   checkDone: [], unlocked: [1], tela: 1,
-  hist: [], enigResp: [], dmFinalizado: false
+  hist: [], enigResp: [], dmFinalizado: false,
+  // Monitoramento de comportamento
+  monitor: {
+    inicioSessao: null,    // timestamp de início da sessão
+    saidasAba: 0,          // nº de vezes que saiu da aba
+    tempoForaSeg: 0,       // tempo total fora em segundos
+    saidasFullscreen: 0,   // nº de saídas do fullscreen
+    penalXpTotal: 0        // total de XP perdido por saídas
+  }
 };
 
 const NIVEIS = [
@@ -671,7 +679,7 @@ function fazerCadastro() {
   iniciarApp();
   log('Cadastro realizado');
 }
-function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) document.getElementById('check-nota')&&(document.getElementById('check-nota').checked=true); salvarLocal(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
+function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} if(!S.monitor) S.monitor={inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0}; let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) document.getElementById('check-nota')&&(document.getElementById('check-nota').checked=true); salvarLocal(); iniciarMonitoramento(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
 function sair() { try{ localStorage.removeItem('oda_sessao_ativa'); }catch(e){} document.getElementById('app-page').classList.remove('visivel'); document.getElementById('login-page').classList.remove('oculto'); irPagina('pg-login'); }
 function toggleNav() { document.getElementById('sidebar').classList.toggle('aberto'); document.getElementById('overlay-nav').classList.toggle('aberto'); }
 function fecharNav() { document.getElementById('sidebar').classList.remove('aberto'); document.getElementById('overlay-nav').classList.remove('aberto'); }
@@ -714,6 +722,121 @@ function abrirBoasvindas() {
 function fecharBoasvindas() {
   document.getElementById('modal-boasvindas').classList.remove('aberto');
 }
+
+// ==================== MONITORAMENTO DE COMPORTAMENTO ====================
+let _monitorSaidaTs = null; // timestamp de quando saiu da aba/foco
+
+function iniciarMonitoramento() {
+  if(!S.email) return;
+  if(!S.monitor) S.monitor = {inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0};
+  S.monitor.inicioSessao = S.monitor.inicioSessao || new Date().toISOString();
+
+  // 1. Detectar saída/retorno de aba (visibilitychange)
+  document.addEventListener('visibilitychange', function() {
+    if(!S.email) return;
+    if(document.hidden) {
+      _monitorSaidaTs = Date.now();
+      S.monitor.saidasAba++;
+      salvarLocal();
+    } else {
+      if(_monitorSaidaTs) {
+        let segundos = Math.round((Date.now() - _monitorSaidaTs) / 1000);
+        S.monitor.tempoForaSeg += segundos;
+        _monitorSaidaTs = null;
+        let penal = calcularPenalidade(segundos);
+        if(penal > 0) {
+          S.monitor.penalXpTotal += penal;
+          S.xp = Math.max(0, S.xp - penal);
+          atualizarHUD();
+        }
+        mostrarAviso(segundos, penal);
+        salvarLocal();
+      }
+    }
+  });
+
+  // 2. Alerta ao perder foco da janela (blur)
+  window.addEventListener('blur', function() {
+    if(!S.email) return;
+    if(!document.hidden) { // só se não for por visibilitychange
+      _monitorSaidaTs = _monitorSaidaTs || Date.now();
+    }
+  });
+
+  window.addEventListener('focus', function() {
+    if(!S.email || document.hidden) return;
+    if(_monitorSaidaTs && !document.hidden) {
+      let segundos = Math.round((Date.now() - _monitorSaidaTs) / 1000);
+      S.monitor.tempoForaSeg += segundos;
+      _monitorSaidaTs = null;
+      let penal = calcularPenalidade(segundos);
+      if(penal > 0) {
+        S.monitor.penalXpTotal += penal;
+        S.xp = Math.max(0, S.xp - penal);
+        atualizarHUD();
+      }
+      if(segundos > 5) mostrarAviso(segundos, penal);
+      salvarLocal();
+    }
+  });
+
+  // 3. Modo fullscreen + detecção de saída
+  try {
+    let el = document.documentElement;
+    if(el.requestFullscreen) {
+      el.requestFullscreen().catch(()=>{});
+    }
+  } catch(e){}
+
+  document.addEventListener('fullscreenchange', function() {
+    if(!document.fullscreenElement && S.email) {
+      S.monitor.saidasFullscreen++;
+      salvarLocal();
+      mostrarAvisoFullscreen();
+    }
+  });
+}
+
+function calcularPenalidade(segundos) {
+  if(segundos < 30) return 0;
+  if(segundos < 120) return 10;
+  if(segundos < 300) return 25;
+  if(segundos < 600) return 50;
+  return 100;
+}
+
+function mostrarAviso(segundos, penal) {
+  let el = document.getElementById('modal-aviso-saida');
+  if(!el) return;
+  let minutos = Math.floor(segundos / 60);
+  let segs = segundos % 60;
+  let tempoStr = minutos > 0 ? `${minutos}min ${segs}s` : `${segs}s`;
+  document.getElementById('aviso-saida-tempo').textContent = tempoStr;
+  document.getElementById('aviso-saida-penal').textContent = penal > 0 ? `-${penal} XP` : 'Sem penalidade';
+  document.getElementById('aviso-saida-penal').style.color = penal > 0 ? '#ff5050' : '#80ff00';
+  el.classList.add('aberto');
+}
+
+function mostrarAvisoFullscreen() {
+  let el = document.getElementById('modal-aviso-saida');
+  if(!el) return;
+  document.getElementById('aviso-saida-tempo').textContent = '—';
+  document.getElementById('aviso-saida-penal').textContent = 'Saída do modo tela cheia registrada!';
+  document.getElementById('aviso-saida-penal').style.color = '#f0c040';
+  el.classList.add('aberto');
+}
+
+function fecharAvisoSaida() {
+  let el = document.getElementById('modal-aviso-saida');
+  if(el) el.classList.remove('aberto');
+  // Tentar voltar ao fullscreen
+  try {
+    if(!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(()=>{});
+    }
+  } catch(e){}
+}
+// ==================== FIM MONITORAMENTO ====================
 
 function abrirPainel() { document.getElementById('painel').classList.add('aberto'); }
 function fecharPainel() { document.getElementById('painel').classList.remove('aberto'); }
@@ -786,8 +909,10 @@ function carregarPainelAlunos() {
 
   let html='<div style="margin-bottom:1rem;">';
 
-  // Botão zerar todos
-  html+='<div style="margin-bottom:1rem;text-align:right;"><button class="btn-verde" style="background:rgba(255,80,80,.2);border-color:#ff5050;font-size:.65rem;padding:.5rem 1rem;" onclick="abrirModalZerar(\'todos\',null,\'Zerar percurso de TODOS os alunos. Esta ação não pode ser desfeita.\')">⚠️ ZERAR TODOS OS ALUNOS</button></div>';
+  html+='<div style="margin-bottom:1rem;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end;">'
+    +'<button class="btn-verde" style="background:rgba(41,128,185,.25);border-color:#2980b9;font-size:.65rem;padding:.5rem 1rem;" onclick="abrirRankingProf()">🏆 VER RANKING</button>'
+    +'<button class="btn-verde" style="background:rgba(255,80,80,.2);border-color:#ff5050;font-size:.65rem;padding:.5rem 1rem;" onclick="abrirModalZerar(\'todos\',null,\'Zerar percurso de TODOS os alunos. Esta ação não pode ser desfeita.\')">⚠️ ZERAR TODOS OS ALUNOS</button>'
+    +'</div>';
 
   // Cards por turma com botão de zerar turma
   html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:1.2rem;">';
@@ -817,6 +942,9 @@ function carregarPainelAlunos() {
     +'<th style="padding:8px;text-align:center;color:#c9a84c;">Enigmas</th>'
     +'<th style="padding:8px;text-align:center;color:#c9a84c;">Checklist</th>'
     +'<th style="padding:8px;text-align:center;color:#c9a84c;">Fase</th>'
+    +'<th style="padding:8px;text-align:center;color:#f0c040;">⚠️ Saídas</th>'
+    +'<th style="padding:8px;text-align:center;color:#f0c040;">⏱ Fora</th>'
+    +'<th style="padding:8px;text-align:center;color:#ff5050;">−XP</th>'
     +'<th style="padding:8px;text-align:center;color:#c9a84c;">Ações</th>'
     +'</tr></thead><tbody>';
 
@@ -824,6 +952,11 @@ function carregarPainelAlunos() {
     let nv=getNivel(a.xp||0);
     let par=i%2===0?'rgba(255,255,255,.03)':'transparent';
     let emailEsc=(a.email||'').replace(/'/g,"\\'");
+    let mon=a.monitor||{saidasAba:0,tempoForaSeg:0,penalXpTotal:0};
+    let tempoFora=mon.tempoForaSeg||0;
+    let minFora=Math.floor(tempoFora/60), segFora=tempoFora%60;
+    let tempoStr=minFora>0?`${minFora}min ${segFora}s`:`${tempoFora}s`;
+    let corSaidas=(mon.saidasAba||0)>3?'#ff5050':(mon.saidasAba||0)>1?'#f0c040':'#80ff00';
     html+='<tr style="background:'+par+';border-bottom:1px solid rgba(255,255,255,.06);">'
       +'<td style="padding:7px 8px;color:#888;">'+(i+1)+'</td>'
       +'<td style="padding:7px 8px;color:#fff;font-weight:600;">'+(a.nome||'—')+'</td>'
@@ -836,6 +969,9 @@ function carregarPainelAlunos() {
       +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+((a.enigResp||[]).length)+'/4</td>'
       +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+((a.checkDone||[]).length)+'/10</td>'
       +'<td style="padding:7px 8px;text-align:center;color:#c9a84c;">'+Math.max(...(a.unlocked||[1]))+'</td>'
+      +'<td style="padding:7px 8px;text-align:center;color:'+corSaidas+';font-weight:700;">'+(mon.saidasAba||0)+'</td>'
+      +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+tempoStr+'</td>'
+      +'<td style="padding:7px 8px;text-align:center;color:#ff5050;font-weight:700;">'+(mon.penalXpTotal||0?'-'+(mon.penalXpTotal||0):'—')+'</td>'
       +'<td style="padding:7px 8px;text-align:center;"><button onclick="abrirModalZerar(\'aluno\',\''+emailEsc+'\',\'Zerar percurso de '+(a.nome||'este aluno')+'?\')" style="background:rgba(255,80,80,.15);border:1px solid #ff5050;color:#ff8080;font-size:.55rem;padding:.25rem .5rem;cursor:pointer;border-radius:4px;font-family:\'Press Start 2P\',monospace;">ZERAR</button></td>'
       +'</tr>';
   });
@@ -865,6 +1001,146 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+// ==================== RANKING DO PROFESSOR ====================
+function abrirRankingProf() {
+  // Coleta todos os alunos
+  let alunos = [];
+  for(let i = 0; i < localStorage.length; i++) {
+    let k = localStorage.key(i);
+    if(k && k.startsWith(CHAVE_AUTH)) {
+      let email = k.replace(CHAVE_AUTH, '');
+      if(email === PROF_EMAIL) continue;
+      try { alunos.push(JSON.parse(localStorage.getItem(k))); } catch(e) {}
+    }
+  }
+  alunos.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+
+  // Agrupa por turma
+  let turmas = {};
+  alunos.forEach(a => { let t = a.turma || '—'; if(!turmas[t]) turmas[t] = []; turmas[t].push(a); });
+
+  let label = document.getElementById('ranking-turma-label');
+  label.textContent = `Ranking Geral · ${alunos.length} aluno${alunos.length !== 1 ? 's' : ''}`;
+
+  let podioEmoji = ['🥇','🥈','🥉'];
+  let podioColors = ['#c9a84c','#b0b8c4','#c87941'];
+  let html = '';
+
+  // Pódio top 3 geral
+  if(alunos.length > 0) {
+    html += '<div style="display:flex;justify-content:center;gap:10px;margin-bottom:1.2rem;flex-wrap:wrap;">';
+    for(let p = 0; p < Math.min(3, alunos.length); p++) {
+      let a = alunos[p];
+      let nv = getNivel(a.xp || 0);
+      html += `<div style="background:rgba(255,255,255,.06);border:2px solid ${podioColors[p]};border-radius:10px;padding:.8rem .7rem;text-align:center;min-width:130px;flex:1;">
+        <div style="font-size:1.6rem;">${podioEmoji[p]}</div>
+        <div style="font-size:1.2rem;margin:.2rem 0;">${nv.av}</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:.45rem;color:${podioColors[p]};margin-bottom:.2rem;">${nv.nome}</div>
+        <div style="font-size:.78rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">${a.nome || '—'}</div>
+        <div style="font-size:.65rem;color:#aaa;">Turma ${a.turma || '—'}</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:.6rem;color:#80ff00;margin-top:.3rem;">${a.xp || 0} XP</div>
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  // Por turma
+  Object.entries(turmas).sort((a, b) => a[0].localeCompare(b[0])).forEach(([t, al]) => {
+    html += `<div style="margin-bottom:1rem;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:.55rem;color:#c9a84c;border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:.4rem;margin-bottom:.5rem;">TURMA ${t} · ${al.length} aluno${al.length !== 1 ? 's' : ''}</div>`;
+    al.forEach((a, i) => {
+      let nv = getNivel(a.xp || 0);
+      let posColor = i === 0 ? '#c9a84c' : i === 1 ? '#b0b8c4' : i === 2 ? '#c87941' : '#666';
+      html += `<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:.45rem .7rem;margin-bottom:.3rem;display:flex;align-items:center;gap:.6rem;">
+        <div style="font-family:'Press Start 2P',monospace;font-size:.5rem;color:${posColor};min-width:1.4rem;text-align:center;">${i+1}º</div>
+        <div style="font-size:1rem;">${nv.av}</div>
+        <div style="flex:1;"><div style="font-size:.82rem;font-weight:600;color:#fff;">${a.nome || '—'}</div><div style="font-size:.68rem;color:#aaa;">${nv.nome}</div></div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:.58rem;color:#80ff00;">${a.xp || 0} XP</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('ranking-lista').innerHTML = html;
+  document.getElementById('modal-ranking').classList.add('aberto');
+}
+
+// ==================== RANKING DA TURMA ====================
+function abrirRanking() {
+  // Coleta todos os alunos da mesma turma do aluno logado
+  let minhaTurma = S.turma || '';
+  let meuAno = S.ano || '';
+  let alunos = [];
+
+  for(let i = 0; i < localStorage.length; i++) {
+    let k = localStorage.key(i);
+    if(k && k.startsWith(CHAVE_AUTH)) {
+      let email = k.replace(CHAVE_AUTH, '');
+      if(email === PROF_EMAIL) continue;
+      try {
+        let obj = JSON.parse(localStorage.getItem(k));
+        // Filtra pela mesma turma e ano do aluno logado
+        if((obj.turma || '') === minhaTurma && (obj.ano || '') === meuAno) {
+          alunos.push(obj);
+        }
+      } catch(e) {}
+    }
+  }
+
+  alunos.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+
+  let label = document.getElementById('ranking-turma-label');
+  label.textContent = minhaTurma ? `Turma ${minhaTurma} · Ano ${meuAno} · ${alunos.length} aluno${alunos.length !== 1 ? 's' : ''}` : 'Sua turma';
+
+  let html = '';
+  if(alunos.length === 0) {
+    html = '<p style="color:#aaa;text-align:center;padding:1.5rem;">Nenhum aluno encontrado nesta turma.</p>';
+  } else {
+    // Pódio (top 3)
+    let podioEmoji = ['🥇','🥈','🥉'];
+    let podioColors = ['#c9a84c','#b0b8c4','#c87941'];
+
+    html += '<div style="display:flex;justify-content:center;gap:10px;margin-bottom:1.2rem;flex-wrap:wrap;">';
+    for(let p = 0; p < Math.min(3, alunos.length); p++) {
+      let a = alunos[p];
+      let nv = getNivel(a.xp || 0);
+      let euClass = (a.email || '') === S.email ? 'box-shadow:0 0 0 2px #80ff00;' : '';
+      let euLabel = (a.email || '') === S.email ? '<div style="font-size:.6rem;color:#80ff00;margin-top:2px;">← VOCÊ</div>' : '';
+      html += `<div style="background:rgba(255,255,255,.06);border:2px solid ${podioColors[p]};border-radius:10px;padding:.8rem .7rem;text-align:center;min-width:130px;flex:1;${euClass}">
+        <div style="font-size:1.6rem;">${podioEmoji[p]}</div>
+        <div style="font-size:1.2rem;margin:.2rem 0;">${nv.av}</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:.48rem;color:${podioColors[p]};margin-bottom:.25rem;">${nv.nome}</div>
+        <div style="font-size:.8rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">${a.nome || '—'}</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:.6rem;color:#80ff00;margin-top:.3rem;">${a.xp || 0} XP</div>
+        ${euLabel}
+      </div>`;
+    }
+    html += '</div>';
+
+    // Lista completa
+    html += '<div style="border-top:1px solid rgba(255,255,255,.1);padding-top:.7rem;">';
+    alunos.forEach(function(a, i) {
+      let nv = getNivel(a.xp || 0);
+      let euStyle = (a.email || '') === S.email ? 'background:rgba(128,255,0,.08);border:1px solid rgba(128,255,0,.3);' : 'background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);';
+      let euTag = (a.email || '') === S.email ? '<span style="font-size:.6rem;color:#80ff00;margin-left:.4rem;">← VOCÊ</span>' : '';
+      let posColor = i === 0 ? '#c9a84c' : i === 1 ? '#b0b8c4' : i === 2 ? '#c87941' : '#666';
+      html += `<div style="${euStyle}border-radius:8px;padding:.5rem .75rem;margin-bottom:.4rem;display:flex;align-items:center;gap:.6rem;">
+        <div style="font-family:'Press Start 2P',monospace;font-size:.55rem;color:${posColor};min-width:1.4rem;text-align:center;">${i+1}º</div>
+        <div style="font-size:1.1rem;">${nv.av}</div>
+        <div style="flex:1;">
+          <div style="font-size:.85rem;font-weight:600;color:#fff;">${a.nome || '—'}${euTag}</div>
+          <div style="font-size:.72rem;color:#aaa;">${nv.nome}</div>
+        </div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:.6rem;color:#80ff00;">${a.xp || 0} XP</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  document.getElementById('ranking-lista').innerHTML = html;
+  document.getElementById('modal-ranking').classList.add('aberto');
+}
+
 </script>
 
 <div class="modal-fundo" id="modal-boasvindas" style="z-index:6000;align-items:flex-start;padding-top:0;overflow-y:auto;">
@@ -875,9 +1151,44 @@ document.addEventListener('DOMContentLoaded', function() {
       <p style="font-size:.85rem;color:#d1e3f8;line-height:1.7;margin-bottom:1rem;">Bem-vindo, <strong id="bv-nome" style="color:#c9a84c;"></strong>! Nesta jornada você vai explorar o Iluminismo, a Revolução Americana e seus impactos no mundo. Conforme acumula XP, você avança pelos <strong>8 papéis históricos</strong> abaixo:</p>
     </div>
     <div id="bv-papeis" style="display:grid;gap:8px;margin-bottom:1.2rem;"></div>
-    <div style="text-align:center;">
-      <button onclick="fecharBoasvindas()" style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);color:#0d1f3c;border:none;padding:.75rem 2rem;border-radius:30px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:.88rem;cursor:pointer;letter-spacing:.04em;">▶ COMEÇAR A JORNADA</button>
+    <!-- Aviso de política de monitoramento -->
+    <div style="background:rgba(255,200,50,.08);border:1px solid rgba(255,200,50,.4);border-radius:8px;padding:.9rem 1rem;margin-bottom:1.2rem;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:.55rem;color:#f0c040;margin-bottom:.6rem;">⚠️ REGRAS DO JOGO</div>
+      <ul style="font-size:.8rem;color:#d1e3f8;line-height:1.8;margin:0;padding-left:1.2rem;">
+        <li>O jogo abre em <strong>modo tela cheia</strong>. Permaneça nele.</li>
+        <li>Sair da aba ou janela <strong>desconta XP</strong> após 30 segundos.</li>
+        <li>O professor é notificado sobre cada saída e o tempo fora.</li>
+        <li>Saídas involuntárias curtas (menos de 30s) não têm penalidade.</li>
+      </ul>
+      <div style="font-size:.75rem;color:#aaa;margin-top:.5rem;">Tabela de penalidades: 30s–2min = −10 XP · 2–5min = −25 XP · 5–10min = −50 XP · +10min = −100 XP</div>
     </div>
+    <div style="text-align:center;">
+      <button onclick="fecharBoasvindas()" style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);color:#0d1f3c;border:none;padding:.75rem 2rem;border-radius:30px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:.88rem;cursor:pointer;letter-spacing:.04em;">▶ ENTENDIDO — COMEÇAR!</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de aviso de saída da aba/fullscreen -->
+<div class="modal-fundo" id="modal-aviso-saida" style="z-index:7000;">
+  <div style="background:linear-gradient(160deg,#1a0a0a,#2d0f0f);border:2px solid #ff5050;max-width:380px;width:95%;margin:auto;padding:1.5rem 1.2rem;border-radius:12px;text-align:center;">
+    <div style="font-size:2.2rem;margin-bottom:.6rem;">⚠️</div>
+    <div style="font-family:'Press Start 2P',monospace;font-size:.65rem;color:#ff5050;margin-bottom:.8rem;">VOCÊ SAIU DO JOGO!</div>
+    <p style="font-size:.82rem;color:#d1e3f8;line-height:1.6;margin-bottom:.8rem;">Você ficou ausente por: <strong style="color:#f0c040;" id="aviso-saida-tempo">—</strong></p>
+    <p style="font-size:.82rem;margin-bottom:1rem;">Penalidade: <strong id="aviso-saida-penal" style="color:#ff5050;">—</strong></p>
+    <p style="font-size:.75rem;color:#aaa;margin-bottom:1rem;">Esta ausência foi registrada. Volte para continuar sua jornada!</p>
+    <button onclick="fecharAvisoSaida()" style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);color:#0d1f3c;border:none;padding:.65rem 1.8rem;border-radius:30px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:.85rem;cursor:pointer;">▶ VOLTAR AO JOGO</button>
+  </div>
+</div>
+
+<!-- Modal de Ranking da Turma -->
+<div class="modal-fundo" id="modal-ranking">
+  <div class="modal-caixa" style="max-width:520px;max-height:88vh;overflow-y:auto;text-align:left;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;">
+      <span style="font-family:'Press Start 2P',monospace;font-size:.7rem;color:#c9a84c;">🏆 RANKING DA TURMA</span>
+      <button onclick="fecharModal('modal-ranking')" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;">×</button>
+    </div>
+    <div id="ranking-turma-label" style="font-size:.78rem;color:#91c7ff;margin-bottom:.8rem;text-align:center;"></div>
+    <div id="ranking-lista"></div>
   </div>
 </div>
 
