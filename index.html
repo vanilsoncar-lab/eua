@@ -147,6 +147,28 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
 .activity-nota h3{font-size:.9rem;color:#e8cc7a;margin-bottom:6px;}
 .confirm-check-wrap{display:flex;align-items:center;gap:9px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(201,168,76,.25);cursor:pointer;}
 .confirm-check-wrap input[type="checkbox"]{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;}
+/* ── Atividade Pesquisa Temporizada ── */
+.pesq-regras{background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.35);border-radius:10px;padding:.9rem 1rem;margin:.8rem 0;font-family:'Montserrat',sans-serif;font-size:.78rem;color:#e8cc7a;line-height:1.7;}
+.pesq-regras ul{margin:.4rem 0 0 1rem;color:#d1e3f8;}
+.pesq-timer-wrap{display:flex;align-items:center;gap:10px;margin:.7rem 0;}
+.pesq-timer{font-family:'Press Start 2P',monospace;font-size:1.1rem;color:#6effa0;min-width:60px;}
+.pesq-timer.urgente{color:var(--crimson);animation:pisca .7s infinite;}
+.pesq-timer-bar{flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:8px;overflow:hidden;}
+.pesq-timer-fill{height:100%;background:linear-gradient(90deg,#6effa0,#c9a84c);width:100%;transition:width .5s linear;border-radius:8px;}
+.pesq-timer-fill.urgente{background:var(--crimson);}
+#pesq-textarea{width:100%;min-height:130px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,168,76,.4);border-radius:9px;color:#d1e3f8;font-family:'Montserrat',sans-serif;font-size:.82rem;line-height:1.6;padding:.7rem .9rem;resize:vertical;margin:.6rem 0;outline:none;box-sizing:border-box;}
+#pesq-textarea:focus{border-color:var(--gold);}
+#pesq-textarea:disabled{opacity:.5;cursor:not-allowed;}
+.pesq-char-count{font-family:'Montserrat',sans-serif;font-size:.7rem;color:rgba(255,255,255,.4);text-align:right;margin-top:-4px;}
+.pesq-send-btn{background:linear-gradient(135deg,#c9a84c,#e8cc7a);color:#0d0f0d;border:none;border-radius:8px;padding:.55rem 1.3rem;font-family:'Press Start 2P',monospace;font-size:.62rem;cursor:pointer;width:100%;margin-top:.5rem;}
+.pesq-send-btn:disabled{opacity:.4;cursor:not-allowed;}
+.pesq-feedback{margin-top:.9rem;padding:.8rem 1rem;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:.8rem;line-height:1.65;display:none;}
+.pesq-feedback.ok{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.4);color:#6effa0;}
+.pesq-feedback.parcial{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.4);color:#e8cc7a;}
+.pesq-feedback.erro{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.4);color:#ff7e7e;}
+.pesq-xp-ganho{font-family:'Press Start 2P',monospace;font-size:.7rem;margin-top:.5rem;text-align:center;}
+.pesq-bloqueado{text-align:center;padding:.7rem;color:var(--crimson);font-family:'Montserrat',sans-serif;font-size:.78rem;border:1px solid rgba(231,76,60,.3);border-radius:8px;margin-top:.5rem;}
+@keyframes pisca{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* DM */
 .lacuna-wrap{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:1.1rem 1.3rem;font-size:.92rem;margin-bottom:.8rem;}
@@ -385,7 +407,51 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
   </div>
   <p style="font-size:.75rem;color:#888;text-align:center;margin-top:.6rem;">As colônias ocupavam apenas a faixa costeira. O restante do território atual dos EUA foi incorporado entre 1783 e 1959.</p>
 </div>
-<div class="enigma-box" id="enigma-3"><div class="enigma-header"><span class="enigma-icon">🔐</span><span class="enigma-title">ENIGMA Nº 3</span></div><div style="background:rgba(201,168,76,.08);border-left:3px solid #c9a84c;border-radius:6px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.82rem;color:#e8cc7a;line-height:1.7;"><strong>💡 Pista:</strong> Em 1776, os americanos provaram que era possível derrubar um governo opressor com base em ideais iluministas. Treze anos depois, em 1789, um país europeu viveu uma revolução ainda mais radical, inspirada nesse modelo. Esse país é a pátria de Montesquieu, Voltaire, Rousseau e Diderot — os principais filósofos que você estudou. Qual foi a grande revolução desse país?</div><p class="enigma-question">Qual revolução europeia de 1789 foi diretamente inspirada pela Independência dos EUA e pelos ideais iluministas?</p><div class="enigma-options"><div class="enigma-opt" onclick="respEnigma(3,this,false)" data-enig="3" data-correct="false">A) Industrial</div><div class="enigma-opt" onclick="respEnigma(3,this,true)" data-enig="3" data-correct="true">B) Francesa</div><div class="enigma-opt" onclick="respEnigma(3,this,false)" data-enig="3" data-correct="false">C) Russa</div><div class="enigma-opt" onclick="respEnigma(3,this,false)" data-enig="3" data-correct="false">D) Gloriosa</div></div><div class="enigma-feedback"></div></div><div class="activity-nota"><div class="nota-badge">Atividade com Nota</div><h3>Pesquisa - 2° Trimestre</h3><p>Pesquise 3 impactos da Independência dos EUA.</p><div class="nota-value">Valor: 3 pontos</div><div class="confirm-check-wrap"><input type="checkbox" id="check-nota"><label>✓ Pesquisei e anotei</label></div></div><div class="nav-btn-wrapper"><button class="btn-continue locked" id="btn-next-3" disabled>Continuar</button><span class="lock-hint">Confirme a atividade</span></div></div></section>
+<div class="enigma-box" id="enigma-3"><div class="enigma-header"><span class="enigma-icon">🔐</span><span class="enigma-title">ENIGMA Nº 3</span></div><div style="background:rgba(201,168,76,.08);border-left:3px solid #c9a84c;border-radius:6px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.82rem;color:#e8cc7a;line-height:1.7;"><strong>💡 Pista:</strong> Em 1776, os americanos provaram que era possível derrubar um governo opressor com base em ideais iluministas. Treze anos depois, em 1789, um país europeu viveu uma revolução ainda mais radical, inspirada nesse modelo. Esse país é a pátria de Montesquieu, Voltaire, Rousseau e Diderot — os principais filósofos que você estudou. Qual foi a grande revolução desse país?</div><p class="enigma-question">Qual revolução europeia de 1789 foi diretamente inspirada pela Independência dos EUA e pelos ideais iluministas?</p><div class="enigma-options"><div class="enigma-opt" onclick="respEnigma(3,this,false)" data-enig="3" data-correct="false">A) Industrial</div><div class="enigma-opt" onclick="respEnigma(3,this,true)" data-enig="3" data-correct="true">B) Francesa</div><div class="enigma-opt" onclick="respEnigma(3,this,false)" data-enig="3" data-correct="false">C) Russa</div><div class="enigma-opt" onclick="respEnigma(3,this,false)" data-enig="3" data-correct="false">D) Gloriosa</div></div><div class="enigma-feedback"></div></div><div class="activity-nota" id="pesq-activity-wrap">
+  <div class="nota-badge">Atividade com Nota</div>
+  <h3>📝 Pesquisa — 2° Trimestre</h3>
+  <p style="font-family:'Montserrat',sans-serif;font-size:.82rem;color:#d1e3f8;line-height:1.6;margin:.4rem 0 .3rem;">
+    Descreva <strong style="color:#e8cc7a;">3 impactos da Independência dos EUA</strong> com suas próprias palavras.
+  </p>
+  <div class="nota-value">Valor: até 100 XP</div>
+
+  <!-- Regras de pontuação -->
+  <div class="pesq-regras" id="pesq-regras-box">
+    <strong>⚖️ Como funciona a pontuação?</strong>
+    <ul>
+      <li>Resposta completa + rápida → <strong>até 100 XP</strong></li>
+      <li>Resposta completa, mas sem pressa → <strong>até 70 XP</strong></li>
+      <li>Resposta correta, mas incompleta → <strong>até 30 XP</strong> (tempo não conta)</li>
+      <li>Resposta insuficiente → <strong>0 XP</strong></li>
+    </ul>
+    <div style="margin-top:.5rem;color:var(--crimson);"><strong>⏱ Tempo máximo: 7 minutos.</strong> Após isso, o envio será bloqueado!</div>
+  </div>
+
+  <!-- Timer -->
+  <div class="pesq-timer-wrap" id="pesq-timer-wrap" style="display:none;">
+    <span style="font-family:'Montserrat',sans-serif;font-size:.75rem;color:rgba(255,255,255,.5);">Tempo:</span>
+    <span class="pesq-timer" id="pesq-timer-display">7:00</span>
+    <div class="pesq-timer-bar"><div class="pesq-timer-fill" id="pesq-timer-fill"></div></div>
+  </div>
+
+  <!-- Área de resposta -->
+  <div id="pesq-input-area" style="display:none;">
+    <textarea id="pesq-textarea" placeholder="Escreva aqui os 3 impactos que você pesquisou..."></textarea>
+    <div class="pesq-char-count"><span id="pesq-char-n">0</span> caracteres</div>
+    <button class="pesq-send-btn" id="pesq-send-btn" onclick="enviarPesquisa()">✔ ENVIAR RESPOSTA</button>
+  </div>
+
+  <!-- Botão iniciar -->
+  <div id="pesq-start-area" style="margin-top:.8rem;">
+    <button class="pesq-send-btn" id="pesq-start-btn" onclick="iniciarPesquisa()">▶ INICIAR ATIVIDADE</button>
+  </div>
+
+  <!-- Feedback -->
+  <div class="pesq-feedback" id="pesq-feedback"></div>
+  <div class="pesq-xp-ganho" id="pesq-xp-ganho" style="display:none;"></div>
+  <div class="pesq-bloqueado" id="pesq-bloqueado" style="display:none;">⛔ Tempo esgotado! Atividade bloqueada.</div>
+</div>
+<div class="nav-btn-wrapper"><button class="btn-continue locked" id="btn-next-3" disabled>Continuar</button><span class="lock-hint" id="hint-3">Conclua a atividade</span></div></div></section>
       
       <section id="screen-4" class="screen"><div class="screen-inner"><h2>⭐ Sistematização</h2><div id="checklist-progress-label">0 de 10 itens</div><div id="checklist-progress-bar"><div id="checklist-progress-fill"></div></div><div id="checklist-container"></div><div id="conclusion-display"><span>🏅</span><h2>Checklist Concluído!</h2><div class="nav-btn-wrapper"><button class="btn-continue" id="btn-roteiro" onclick="avancarParaAprofundamento()">Ir para Aprofundamento</button></div></div></div></section>
       
@@ -431,6 +497,7 @@ let S = {
   philoAbertos: [], tlRevelados: [], notaOk: false,
   checkDone: [], unlocked: [1], tela: 1,
   hist: [], enigResp: [], dmFinalizado: false,
+  pesquisaConcluida: false, pesquisaXp: 0, pesquisaResposta: '',
   // Monitoramento de comportamento
   monitor: {
     inicioSessao: null,    // timestamp de início da sessão
@@ -612,7 +679,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('btn-next-1')?.addEventListener('click',()=>{if(!S.unlocked.includes(2))S.unlocked.push(2); irPara(2);});
   document.getElementById('btn-next-2')?.addEventListener('click',()=>{if(!S.unlocked.includes(3))S.unlocked.push(3); irPara(3);});
   document.getElementById('btn-next-3')?.addEventListener('click',()=>{if(!S.unlocked.includes(4))S.unlocked.push(4); irPara(4);});
-  document.getElementById('check-nota')?.addEventListener('change',function(){ S.notaOk=this.checked; if(S.notaOk){ S.xp+=40; atualizarHUD(); desbloquearBtn('btn-next-3','hint-3','Continuar'); } salvarLocal();});
+  // pesquisa: sem handler (handled by buttons)
   document.getElementById('check-roteiro')?.addEventListener('change',function(){ if(this.checked){ document.getElementById('conclusion-roteiro').style.display='block'; S.xp+=100; atualizarHUD(); if(!S.unlocked.includes(6))S.unlocked.push(6); atualizarMenu(); salvarLocal();}});
   // Restaurar sessão ao recarregar (F5)
   try {
@@ -674,18 +741,180 @@ function fazerCadastro() {
   if(senha.length<4){document.getElementById('msg-cadastro').textContent='Senha deve ter pelo menos 4 caracteres';return;}
   if(localStorage.getItem(CHAVE_AUTH+email.toLowerCase())){document.getElementById('msg-cadastro').textContent='E-mail já cadastrado';return;}
   try{localStorage.removeItem('oda_sessao_ativa');}catch(e){}
-  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[]};
+  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[]};
   salvarLocal();
   iniciarApp();
   log('Cadastro realizado');
 }
-function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} if(!S.monitor) S.monitor={inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0}; let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) document.getElementById('check-nota')&&(document.getElementById('check-nota').checked=true); salvarLocal(); iniciarMonitoramento(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
+function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} if(!S.monitor) S.monitor={inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0}; let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) restaurarPesquisa(); salvarLocal(); iniciarMonitoramento(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
 function sair() { try{ localStorage.removeItem('oda_sessao_ativa'); }catch(e){} document.getElementById('app-page').classList.remove('visivel'); document.getElementById('login-page').classList.remove('oculto'); irPagina('pg-login'); }
 function toggleNav() { document.getElementById('sidebar').classList.toggle('aberto'); document.getElementById('overlay-nav').classList.toggle('aberto'); }
 function fecharNav() { document.getElementById('sidebar').classList.remove('aberto'); document.getElementById('overlay-nav').classList.remove('aberto'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('aberto'); }
 function confirmarReinicio() { document.getElementById('modal-reinicio').classList.add('aberto'); }
-function executarReinicio() { for(let k in S) if(!['nome','turma'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; fecharModal('modal-reinicio'); location.reload(); }
+/* ══════════════════════════════════════════════
+   PESQUISA TEMPORIZADA — Impactos da Independência
+   ══════════════════════════════════════════════ */
+let _pesqTimer = null;
+let _pesqSegRestantes = 420; // 7 min = 420s
+let _pesqInicioTs = null;
+
+function iniciarPesquisa() {
+  if (S.pesquisaConcluida) return;
+  document.getElementById('pesq-start-area').style.display = 'none';
+  document.getElementById('pesq-timer-wrap').style.display = 'flex';
+  document.getElementById('pesq-input-area').style.display = 'block';
+  document.getElementById('pesq-textarea').focus();
+  document.getElementById('pesq-textarea').addEventListener('input', function() {
+    document.getElementById('pesq-char-n').textContent = this.value.length;
+  });
+  _pesqSegRestantes = 420;
+  _pesqInicioTs = Date.now();
+  _pesqTimer = setInterval(_pesqTick, 500);
+}
+
+function _pesqTick() {
+  var elapsed = Math.floor((Date.now() - _pesqInicioTs) / 1000);
+  _pesqSegRestantes = Math.max(0, 420 - elapsed);
+  var min = Math.floor(_pesqSegRestantes / 60);
+  var seg = _pesqSegRestantes % 60;
+  var display = document.getElementById('pesq-timer-display');
+  var fill = document.getElementById('pesq-timer-fill');
+  if (!display) return;
+  display.textContent = min + ':' + (seg < 10 ? '0' : '') + seg;
+  fill.style.width = (_pesqSegRestantes / 420 * 100) + '%';
+  if (_pesqSegRestantes <= 60) {
+    display.classList.add('urgente');
+    fill.classList.add('urgente');
+  }
+  if (_pesqSegRestantes === 0) {
+    clearInterval(_pesqTimer);
+    _bloquearPesquisa();
+  }
+}
+
+function _bloquearPesquisa() {
+  var ta = document.getElementById('pesq-textarea');
+  var btn = document.getElementById('pesq-send-btn');
+  if (ta) ta.disabled = true;
+  if (btn) btn.disabled = true;
+  document.getElementById('pesq-bloqueado').style.display = 'block';
+}
+
+function enviarPesquisa() {
+  var resposta = (document.getElementById('pesq-textarea').value || '').trim();
+  if (resposta.length < 30) {
+    alert('Escreva sua resposta antes de enviar!');
+    return;
+  }
+  clearInterval(_pesqTimer);
+  var tempoGasto = Math.floor((Date.now() - _pesqInicioTs) / 1000); // segundos
+  var btn = document.getElementById('pesq-send-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Verificando...';
+  document.getElementById('pesq-textarea').disabled = true;
+
+  var prompt = 'Você é um professor de História do 8° ano avaliando a resposta de um aluno sobre a Independência dos EUA.\n\n' +
+    'O aluno deveria listar e explicar 3 impactos da Independência dos EUA no mundo.\n\n' +
+    'Resposta do aluno: "' + resposta + '"\n\n' +
+    'Avalie e responda APENAS com JSON válido, sem markdown, neste formato:\n' +
+    '{"status":"completa"|"parcial"|"insuficiente","nota":0-100,"feedback":"mensagem curta e motivadora em português, no máximo 3 frases","impactos_identificados":["impacto1","impacto2","impacto3"]}\n\n' +
+    'Critérios:\n' +
+    '- "completa": 3 impactos claros e explicados (nota 70-100)\n' +
+    '- "parcial": 1-2 impactos ou impactos vagos sem explicação (nota 20-50)\n' +
+    '- "insuficiente": resposta fora do tema ou muito vaga (nota 0)\n' +
+    'Seja justo mas generoso com alunos de 8° ano.';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var text = (data.content || []).map(function(i){ return i.text || ''; }).join('');
+    var clean = text.replace(/```json|```/g, '').trim();
+    var result = JSON.parse(clean);
+    _aplicarResultadoPesquisa(result, tempoGasto, resposta);
+  })
+  .catch(function(err) {
+    btn.disabled = false;
+    btn.textContent = '✔ ENVIAR RESPOSTA';
+    document.getElementById('pesq-textarea').disabled = false;
+    alert('Erro ao verificar. Tente novamente!');
+  });
+}
+
+function _aplicarResultadoPesquisa(result, tempoGasto, resposta) {
+  var status = result.status || 'insuficiente';
+  var xpGanho = 0;
+
+  if (status === 'completa') {
+    // Bônus de velocidade: escala de 100xp (≤90s) a 70xp (≥420s)
+    var fatorTempo = Math.max(0, Math.min(1, (420 - tempoGasto) / 330));
+    xpGanho = Math.round(70 + fatorTempo * 30);
+  } else if (status === 'parcial') {
+    // Resposta incompleta → até 30 XP, sem bônus de tempo
+    xpGanho = Math.round((result.nota / 100) * 30);
+  } else {
+    xpGanho = 0;
+  }
+
+  var fbEl = document.getElementById('pesq-feedback');
+  var xpEl = document.getElementById('pesq-xp-ganho');
+
+  fbEl.style.display = 'block';
+  fbEl.className = 'pesq-feedback ' + (status === 'completa' ? 'ok' : status === 'parcial' ? 'parcial' : 'erro');
+
+  var impactosHtml = '';
+  if (result.impactos_identificados && result.impactos_identificados.length) {
+    impactosHtml = '<ul style="margin:.4rem 0 0 1rem;">' +
+      result.impactos_identificados.map(function(imp){ return '<li>' + imp + '</li>'; }).join('') +
+      '</ul>';
+  }
+  fbEl.innerHTML = '<strong>' + (status === 'completa' ? '✅ Resposta completa!' : status === 'parcial' ? '⚠️ Resposta parcial' : '❌ Resposta insuficiente') + '</strong><br>' +
+    result.feedback + impactosHtml;
+
+  if (xpGanho > 0) {
+    S.xp += xpGanho;
+    atualizarHUD();
+    xpEl.style.display = 'block';
+    xpEl.style.color = status === 'completa' ? '#6effa0' : '#e8cc7a';
+    xpEl.textContent = '+' + xpGanho + ' XP' + (status === 'completa' && tempoGasto < 330 ? ' ⚡ (bônus velocidade!)' : '');
+  }
+
+  S.pesquisaConcluida = true;
+  S.pesquisaXp = xpGanho;
+  S.pesquisaResposta = resposta;
+  S.notaOk = true;
+  desbloquearBtn('btn-next-3', 'hint-3', 'Continuar');
+  salvarLocal();
+  log('Pesquisa concluída: ' + status + ' (' + xpGanho + ' XP)');
+}
+
+function restaurarPesquisa() {
+  if (!S.pesquisaConcluida) return;
+  // Ocultar área interativa e mostrar resultado salvo
+  document.getElementById('pesq-start-area').style.display = 'none';
+  document.getElementById('pesq-regras-box').style.display = 'none';
+  var fbEl = document.getElementById('pesq-feedback');
+  fbEl.style.display = 'block';
+  fbEl.className = 'pesq-feedback ok';
+  fbEl.innerHTML = '✅ Atividade já concluída! Sua resposta foi salva.';
+  var xpEl = document.getElementById('pesq-xp-ganho');
+  if (S.pesquisaXp > 0) {
+    xpEl.style.display = 'block';
+    xpEl.style.color = '#6effa0';
+    xpEl.textContent = '+' + S.pesquisaXp + ' XP conquistados';
+  }
+  desbloquearBtn('btn-next-3', 'hint-3', 'Continuar');
+}
+
+function executarReinicio() { for(let k in S) if(!['nome','turma'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; S.pesquisaConcluida=false; S.pesquisaXp=0; S.pesquisaResposta=''; fecharModal('modal-reinicio'); location.reload(); }
 function verHistórico() { document.getElementById('hist-lista').innerHTML=S.hist.map(h=>`<div>${h.t} - ${h.e}</div>`).join('')||'<p>Nenhum evento.</p>'; document.getElementById('modal-hist').classList.add('aberto'); }
 function verPapeis() {
   let nivelAtual=getNivel(S.xp||0);
