@@ -207,6 +207,48 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
 #btn-menu{display:none;}
 #overlay-nav{display:none;}
 @media (max-width:767px){#sidebar{display:none;position:fixed;top:62px;left:0;width:250px;transform:translateX(-100%);z-index:199;}#sidebar.aberto{display:flex;transform:translateX(0);}#overlay-nav.aberto{display:block;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:198;}#btn-menu{display:flex;position:fixed;top:70px;left:7px;z-index:300;background:rgba(0,0,0,.93);border:2px solid #c9a84c;padding:6px 7px;flex-direction:column;gap:4px;}#btn-menu span{width:16px;height:2px;background:#c9a84c;}}
+
+/* ===== BANDEIRA DOS EUA — SVG BANNER ===== */
+.flag-banner-wrap{width:100%;margin:1.4rem 0;border-radius:10px;overflow:hidden;box-shadow:0 6px 28px rgba(0,0,0,.55);position:relative;}
+.flag-banner-wrap svg{display:block;width:100%;height:auto;}
+.flag-caption{background:rgba(0,20,60,.88);border-top:2px solid rgba(201,168,76,.35);padding:.7rem 1rem;font-size:.82rem;color:#d1e3f8;line-height:1.65;}
+.flag-caption strong{color:#e8cc7a;}
+
+/* ===== DUALCARD: DECLARAÇÃO vs RECONHECIMENTO ===== */
+.dualcard-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:1.1rem 0;}
+.dualcard{border-radius:12px;padding:.9rem 1rem;position:relative;overflow:hidden;}
+.dualcard.dec{background:linear-gradient(135deg,rgba(41,128,185,.18),rgba(41,128,185,.06));border:1.5px solid rgba(41,128,185,.45);}
+.dualcard.rec{background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.06));border:1.5px solid rgba(201,168,76,.45);}
+.dualcard-year{font-family:'Press Start 2P',monospace;font-size:.55rem;display:block;margin-bottom:.35rem;}
+.dualcard.dec .dualcard-year{color:#91c7ff;}
+.dualcard.rec .dualcard-year{color:#e8cc7a;}
+.dualcard-icon{font-size:1.5rem;display:block;margin-bottom:.3rem;}
+.dualcard h4{font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:800;margin-bottom:.35rem;}
+.dualcard.dec h4{color:#91c7ff;}
+.dualcard.rec h4{color:#c9a84c;}
+.dualcard p{font-size:.77rem;color:#d1e3f8;line-height:1.6;margin:0;}
+
+/* ===== FAIXA ALIADOS (guerra) ===== */
+.allies-strip{display:flex;align-items:stretch;gap:0;margin:1.1rem 0;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.08);}
+.allies-main{flex:1;background:rgba(41,128,185,.1);padding:.85rem 1rem;}
+.allies-main p{font-size:.8rem;color:#d1e3f8;line-height:1.65;margin:0;}
+.allies-flags{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.3rem;padding:.7rem .9rem;background:rgba(255,255,255,.06);min-width:54px;}
+.allies-flags span{font-size:1.4rem;}
+
+/* ===== QUIZ BANDEIRA ===== */
+.flag-quiz-wrap{background:linear-gradient(135deg,rgba(26,42,74,.95),rgba(13,24,41,.98));border:2px solid rgba(201,168,76,.5);border-radius:14px;padding:1.2rem;margin:1.2rem 0;}
+.flag-quiz-title{font-family:'Press Start 2P',monospace;font-size:.58rem;color:#c9a84c;margin-bottom:.7rem;}
+.flag-quiz-q{font-size:.88rem;color:#d1e3f8;font-style:italic;margin-bottom:.8rem;line-height:1.6;}
+.fq-opt{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.6rem .9rem;cursor:pointer;font-size:.83rem;color:#d1e3f8;margin-bottom:.4rem;transition:all .2s;}
+.fq-opt:hover{border-color:var(--gold);background:rgba(201,168,76,.08);}
+.fq-opt.fq-wrong{background:rgba(220,53,69,.12);border-color:rgba(220,53,69,.4);color:#ff9090;pointer-events:none;}
+.fq-opt.fq-correct-mark{background:rgba(46,204,113,.12);border-color:rgba(46,204,113,.4);color:#6effa0;pointer-events:none;}
+.fq-opt.fq-disabled{pointer-events:none;opacity:.5;}
+.fq-feedback{margin-top:.7rem;padding:.65rem .9rem;border-radius:8px;font-size:.83rem;display:none;line-height:1.6;}
+.fq-feedback.ok{display:block;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);color:#6effa0;}
+.fq-feedback.err{display:block;background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);color:#ff9090;}
+@keyframes pulseGold{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0)}50%{box-shadow:0 0 12px 4px rgba(201,168,76,.35)}}
+.flag-quiz-wrap.pulse{animation:pulseGold 1.6s ease-in-out 2;}
 </style>
 </head>
 <body>
@@ -237,7 +279,7 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
     <div class="login-sub">Preencha seus dados para começar</div>
     <div class="campo"><label>NOME COMPLETO</label><input type="text" id="c-nome" placeholder="Seu nome completo"></div>
     <div class="campo"><label>E-MAIL</label><input type="email" id="c-email" placeholder="seu@email.com"></div>
-    <div class="campo"><label>TURMA</label><input type="text" id="c-turma" placeholder="Ex: 83 ou 8º A"></div>
+    <div class="campo"><label>TURMA</label><input type="text" id="c-turma" placeholder="Ex: 83, ou 93"></div>
     <div class="campo"><label>ANO LETIVO</label><input type="number" id="c-ano" value="2026" min="2024" max="2099"></div>
     <div class="campo"><label>SENHA</label><input type="password" id="c-senha" placeholder="Crie uma senha (mínimo 4 caracteres)"></div>
     <div class="campo"><label>CONFIRMAR SENHA</label><input type="password" id="c-senha2" placeholder="Repita a senha"></div>
@@ -290,7 +332,102 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
       <!-- SCREENS -->
       <section id="screen-1" class="screen"><div class="screen-inner"><h2>⚗️ O Iluminismo</h2><div class="content-card" style="background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.04));border-left:4px solid #c9a84c;margin-bottom:1.2rem;"><p style="font-size:.82rem;color:#e8cc7a;font-family:'Montserrat',sans-serif;font-weight:700;text-transform:uppercase;margin-bottom:.5rem;">📚 Recapitulando o que já estudamos</p><p style="font-size:.9rem;line-height:1.8;color:#d1e3f8;">No século XVIII, o <strong>Iluminismo</strong> surgiu na Europa como um movimento de crítica ao Antigo Regime. Os pensadores iluministas defendiam a razão, a igualdade entre as pessoas e eram contrários aos privilégios da nobreza e à influência política da Igreja. Filósofos como <strong>Locke, Montesquieu, Voltaire, Rousseau e Adam Smith</strong> criaram ideias que abalaram as estruturas do absolutismo e inspiraram revoluções em todo o mundo. Essas ideias você já conhece — agora vamos ver como elas chegaram às colônias americanas.</p></div><div style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);padding:.6rem 1rem;border-radius:8px 8px 0 0;margin-bottom:0;"><p style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:.78rem;color:#0d0f0d;text-transform:uppercase;letter-spacing:.04em;">PRÉ-LEITURA — ATIVANDO CONHECIMENTOS</p></div><div class="content-card" style="border-radius:0 0 12px 12px;border-top:none;margin-bottom:1.2rem;"><p style="font-size:.88rem;line-height:1.8;color:#d1e3f8;margin-bottom:.8rem;">Antes de explorar os filósofos, pense e complete mentalmente as frases:</p><ul style="font-size:.88rem;color:#91c7ff;line-height:2;list-style:none;padding:0;"><li>🔹 O Iluminismo defendia que o poder dos governantes deveria vir do…</li><li>🔹 Para Montesquieu, um governo justo precisava ter seus poderes…</li><li>🔹 Rousseau acreditava que o verdadeiro soberano era o…</li><li>🔹 Esses ideais provavelmente influenciaram as colônias americanas porque…</li></ul></div><p style="font-size:.9rem;line-height:1.7;color:#d1e3f8;margin-bottom:1rem;">Clique em cada filósofo para descobrir suas ideias e como elas chegaram à América.</p><div id="philosophers-grid"></div><div id="philo-counter"></div><div class="enigma-box" id="enigma-1"><div class="enigma-header"><span class="enigma-icon">🔐</span><span class="enigma-title">ENIGMA Nº 1</span></div><div style="background:rgba(201,168,76,.08);border-left:3px solid #c9a84c;border-radius:6px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.82rem;color:#e8cc7a;line-height:1.7;"><strong>💡 Pista:</strong> Entre os filósofos que você explorou, um acreditava que o verdadeiro poder não pertence ao rei nem à Igreja — ele pertence ao povo. Esse filósofo escreveu sobre o <em>contrato social</em>: um acordo entre os cidadãos para viverem em sociedade, onde a vontade da maioria deve guiar o governo. Ele foi muito importante para a Revolução Francesa (1789). Reveja os cards e encontre quem defende essa ideia.</div><p class="enigma-question">Qual filósofo defendeu a soberania popular — ou seja, que o poder emana do povo?</p><div class="enigma-options"><div class="enigma-opt" onclick="respEnigma(1,this,false)" data-enig="1" data-correct="false">A) John Locke</div><div class="enigma-opt" onclick="respEnigma(1,this,false)" data-enig="1" data-correct="false">B) Voltaire</div><div class="enigma-opt" onclick="respEnigma(1,this,true)" data-enig="1" data-correct="true">C) Rousseau</div><div class="enigma-opt" onclick="respEnigma(1,this,false)" data-enig="1" data-correct="false">D) Montesquieu</div></div><div class="enigma-feedback"></div></div><div class="nav-btn-wrapper"><button class="btn-continue locked" id="btn-next-1" disabled>Continuar</button><span class="lock-hint">Abra todos os filósofos</span></div></div></section>
       
-      <section id="screen-2" class="screen"><div class="screen-inner"><h2>📜 A Independência dos EUA</h2><div style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);padding:.6rem 1rem;border-radius:8px 8px 0 0;"><p style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:.78rem;color:#0d0f0d;text-transform:uppercase;letter-spacing:.04em;">PRÉ-LEITURA — ATIVANDO CONHECIMENTOS</p></div><div class="content-card" style="border-radius:0 0 12px 12px;border-top:none;margin-bottom:1.2rem;"><p style="font-size:.88rem;line-height:1.8;color:#d1e3f8;margin-bottom:.8rem;">Antes de explorar a linha do tempo, complete mentalmente as frases:</p><ul style="font-size:.88rem;color:#91c7ff;line-height:2;list-style:none;padding:0;"><li>🔹 No século XVIII, a Inglaterra controlava colônias na América do Norte. Eu imagino que os colonos aceitavam essa situação porque…</li><li>🔹 Se o governo de outro país me cobrasse impostos sem me ouvir, eu me sentiria…</li><li>🔹 A expressão "não há tributação sem representação" significa que…</li><li>🔹 Um documento que proclama a independência de um povo provavelmente contém…</li></ul></div><div class="content-card" style="border-left:4px solid #91c7ff;background:rgba(41,128,185,.07);margin-bottom:1rem;"><p style="font-size:.82rem;color:#91c7ff;font-family:'Montserrat',sans-serif;font-weight:700;text-transform:uppercase;margin-bottom:.5rem;">🗺️ O caminho até a independência</p><p style="font-size:.88rem;line-height:1.8;color:#d1e3f8;">Entre 1765 e 1787, as 13 colônias inglesas viveram crescente tensão, rebeldia e transformação. Cada evento abaixo foi um passo nessa jornada. <strong>Clique em cada evento</strong> para entender o que aconteceu e por que foi importante.</p></div><div id="timeline-container"></div><div id="tl-counter"></div><div style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);padding:.6rem 1rem;border-radius:8px 8px 0 0;margin-top:1.2rem;"><p style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:.78rem;color:#0d0f0d;text-transform:uppercase;letter-spacing:.04em;">A FESTA DO CHÁ DE BOSTON</p></div><div class="content-card" style="border-radius:0 0 12px 12px;border-top:none;margin-bottom:1.2rem;"><p style="font-size:.9rem;line-height:1.8;color:#d1e3f8;">Em 1773, a Inglaterra concedeu o monopólio do comércio de chá à Companhia das Índias Orientais, prejudicando os colonos que vendiam o produto. Indignados com a tributação sem representação, colonos disfarçados de indígenas invadiram três navios ingleses no porto de Boston e lançaram todo o carregamento de chá ao mar. O governo inglês respondeu com as <strong>Leis Intoleráveis</strong>, aumentando o controle sobre as colônias — o que acabou acelerando a marcha rumo à independência.</p></div><div class="enigma-box" id="enigma-2"><div class="enigma-header"><span class="enigma-icon">🔐</span><span class="enigma-title">ENIGMA Nº 2</span></div><div style="background:rgba(201,168,76,.08);border-left:3px solid #c9a84c;border-radius:6px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.82rem;color:#e8cc7a;line-height:1.7;"><strong>💡 Pista:</strong> Em 1773, colonos revoltados com o monopólio inglês do chá invadiram navios e jogaram 342 caixas ao mar. Esse ato ocorreu em um porto famoso da costa leste da América do Norte — uma cidade que também foi palco do Massacre de 1770, onde soldados britânicos abriram fogo contra colonos desarmados. Releia o texto acima e localize o nome desse porto.</div><p class="enigma-question">Em qual cidade ocorreu a Festa do Chá de 1773?</p><div class="enigma-options"><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">A) Nova York</div><div class="enigma-opt" onclick="respEnigma(2,this,true)" data-enig="2" data-correct="true">B) Boston</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">C) Filadélfia</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">D) Charleston</div></div><div class="enigma-feedback"></div></div><div class="nav-btn-wrapper"><button class="btn-continue locked" id="btn-next-2" disabled>Continuar</button><span class="lock-hint">Explore todos os eventos</span></div></div></section>
+      <section id="screen-2" class="screen"><div class="screen-inner"><h2>📜 A Independência dos EUA</h2><div style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);padding:.6rem 1rem;border-radius:8px 8px 0 0;"><p style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:.78rem;color:#0d0f0d;text-transform:uppercase;letter-spacing:.04em;">PRÉ-LEITURA — ATIVANDO CONHECIMENTOS</p></div><div class="content-card" style="border-radius:0 0 12px 12px;border-top:none;margin-bottom:1.2rem;"><p style="font-size:.88rem;line-height:1.8;color:#d1e3f8;margin-bottom:.8rem;">Antes de explorar a linha do tempo, complete mentalmente as frases:</p><ul style="font-size:.88rem;color:#91c7ff;line-height:2;list-style:none;padding:0;"><li>🔹 No século XVIII, a Inglaterra controlava colônias na América do Norte. Eu imagino que os colonos aceitavam essa situação porque…</li><li>🔹 Se o governo de outro país me cobrasse impostos sem me ouvir, eu me sentiria…</li><li>🔹 A expressão "não há tributação sem representação" significa que…</li><li>🔹 Um documento que proclama a independência de um povo provavelmente contém…</li></ul></div><div class="content-card" style="border-left:4px solid #91c7ff;background:rgba(41,128,185,.07);margin-bottom:1rem;"><p style="font-size:.82rem;color:#91c7ff;font-family:'Montserrat',sans-serif;font-weight:700;text-transform:uppercase;margin-bottom:.5rem;">🗺️ O caminho até a independência</p><p style="font-size:.88rem;line-height:1.8;color:#d1e3f8;">Entre 1765 e 1787, as 13 colônias inglesas viveram crescente tensão, rebeldia e transformação. Cada evento abaixo foi um passo nessa jornada. <strong>Clique em cada evento</strong> para entender o que aconteceu e por que foi importante.</p></div><div id="timeline-container"></div><div id="tl-counter"></div><div style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);padding:.6rem 1rem;border-radius:8px 8px 0 0;margin-top:1.2rem;"><p style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:.78rem;color:#0d0f0d;text-transform:uppercase;letter-spacing:.04em;">A FESTA DO CHÁ DE BOSTON</p></div><div class="content-card" style="border-radius:0 0 12px 12px;border-top:none;margin-bottom:1.2rem;"><p style="font-size:.9rem;line-height:1.8;color:#d1e3f8;">Em 1773, a Inglaterra concedeu o monopólio do comércio de chá à Companhia das Índias Orientais, prejudicando os colonos que vendiam o produto. Indignados com a tributação sem representação, colonos disfarçados de indígenas invadiram três navios ingleses no porto de Boston e lançaram todo o carregamento de chá ao mar. O governo inglês respondeu com as <strong>Leis Intoleráveis</strong>, aumentando o controle sobre as colônias — o que acabou acelerando a marcha rumo à independência.</p></div>
+
+<!-- ============================================================
+     BLOCO NOVO: BANDEIRA + DECLARAÇÃO + RECONHECIMENTO + QUIZ
+     ============================================================ -->
+
+<!-- 🇺🇸 BANDEIRA — faixa horizontal total -->
+<div class="flag-banner-wrap">
+  <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- 13 listras alternadas -->
+    <rect width="760" height="400" fill="#B22234"/>
+    <rect y="30.7" width="760" height="30.7" fill="#fff"/>
+    <rect y="61.4" width="760" height="30.7" fill="#B22234"/>
+    <rect y="92.1" width="760" height="30.7" fill="#fff"/>
+    <rect y="122.8" width="760" height="30.7" fill="#B22234"/>
+    <rect y="153.5" width="760" height="30.7" fill="#fff"/>
+    <rect y="184.2" width="760" height="30.7" fill="#B22234"/>
+    <rect y="214.9" width="760" height="30.7" fill="#fff"/>
+    <rect y="245.6" width="760" height="30.7" fill="#B22234"/>
+    <rect y="276.3" width="760" height="30.7" fill="#fff"/>
+    <rect y="307" width="760" height="30.7" fill="#B22234"/>
+    <rect y="337.7" width="760" height="30.7" fill="#fff"/>
+    <rect y="368.4" width="760" height="31.6" fill="#B22234"/>
+    <!-- Cantão azul -->
+    <rect width="304" height="215" fill="#3C3B6E"/>
+    <!-- 50 estrelas (5 linhas de 6 + 4 linhas de 5) simplificadas como asteriscos -->
+    <!-- Linha 1: 6 estrelas -->
+    <text x="15" y="28" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="55" y="28" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="95" y="28" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="135" y="28" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="175" y="28" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="215" y="28" font-size="18" fill="white" font-family="serif">★</text>
+    <!-- Linha 2: 5 estrelas (offset) -->
+    <text x="35" y="54" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="75" y="54" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="115" y="54" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="155" y="54" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="195" y="54" font-size="18" fill="white" font-family="serif">★</text>
+    <!-- Linhas 3-9 (padrão alternado) -->
+    <text x="15" y="80" font-size="18" fill="white" font-family="serif">★</text><text x="55" y="80" font-size="18" fill="white" font-family="serif">★</text><text x="95" y="80" font-size="18" fill="white" font-family="serif">★</text><text x="135" y="80" font-size="18" fill="white" font-family="serif">★</text><text x="175" y="80" font-size="18" fill="white" font-family="serif">★</text><text x="215" y="80" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="35" y="106" font-size="18" fill="white" font-family="serif">★</text><text x="75" y="106" font-size="18" fill="white" font-family="serif">★</text><text x="115" y="106" font-size="18" fill="white" font-family="serif">★</text><text x="155" y="106" font-size="18" fill="white" font-family="serif">★</text><text x="195" y="106" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="15" y="132" font-size="18" fill="white" font-family="serif">★</text><text x="55" y="132" font-size="18" fill="white" font-family="serif">★</text><text x="95" y="132" font-size="18" fill="white" font-family="serif">★</text><text x="135" y="132" font-size="18" fill="white" font-family="serif">★</text><text x="175" y="132" font-size="18" fill="white" font-family="serif">★</text><text x="215" y="132" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="35" y="158" font-size="18" fill="white" font-family="serif">★</text><text x="75" y="158" font-size="18" fill="white" font-family="serif">★</text><text x="115" y="158" font-size="18" fill="white" font-family="serif">★</text><text x="155" y="158" font-size="18" fill="white" font-family="serif">★</text><text x="195" y="158" font-size="18" fill="white" font-family="serif">★</text>
+    <text x="15" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="55" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="95" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="135" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="175" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="215" y="184" font-size="18" fill="white" font-family="serif">★</text>
+    <!-- labels decorativos -->
+    <text x="382" y="200" font-size="13" fill="rgba(255,255,255,.25)" text-anchor="middle" font-style="italic">13 listras · 50 estrelas</text>
+  </svg>
+  <div class="flag-caption">
+    🇺🇸 A bandeira dos Estados Unidos simboliza a <strong>história, os valores e a união</strong> da nação. Suas <strong>13 listras</strong> representam as colônias originais; as <strong>50 estrelas</strong>, os estados atuais. As cores carregam valores morais: <strong style="color:#B22234;">vermelho</strong> = valor e perseverança · <strong>branco</strong> = pureza e inocência · <strong style="color:#91c7ff;">azul</strong> = vigilância, perseverança e justiça.
+  </div>
+</div>
+
+<!-- DUALCARD: Declaração × Reconhecimento -->
+<div class="dualcard-wrap">
+  <div class="dualcard dec">
+    <span class="dualcard-icon">📜</span>
+    <span class="dualcard-year">1776</span>
+    <h4>Declaração de Independência</h4>
+    <p>Ato <strong>unilateral</strong> das 13 colônias: rompimento dos laços com a Grã-Bretanha, fundamentado nos ideais iluministas de liberdade e igualdade.</p>
+  </div>
+  <div class="dualcard rec">
+    <span class="dualcard-icon">🤝</span>
+    <span class="dualcard-year">1783</span>
+    <h4>Reconhecimento Britânico</h4>
+    <p>Após a guerra, a coroa <strong>aceitou oficialmente</strong> a separação pelo Tratado de Paris — legitimando o novo país perante o mundo.</p>
+  </div>
+</div>
+
+<!-- FAIXA ALIADOS: Guerra e apoio estrangeiro -->
+<div class="allies-strip">
+  <div class="allies-main">
+    <p><strong style="color:#91c7ff;">⚔️ 1775–1783 · Guerra de Independência</strong><br>
+    Foi necessária uma longa guerra e o apoio de potências estrangeiras para forçar os britânicos à mesa de negociações. Sem esse suporte, a vitória seria muito mais difícil — ou impossível.</p>
+  </div>
+  <div class="allies-flags">
+    <span title="França">🇫🇷</span>
+    <span title="Espanha">🇪🇸</span>
+    <span title="EUA">🇺🇸</span>
+  </div>
+</div>
+
+<!-- QUIZ DA BANDEIRA -->
+<div class="flag-quiz-wrap" id="flag-quiz-wrap">
+  <div class="flag-quiz-title">🚩 QUESTÃO — MARQUE A ALTERNATIVA INCORRETA</div>
+  <p class="flag-quiz-q">Sobre a bandeira dos EUA e o processo de independência, assinale a afirmativa <strong>INCORRETA</strong>:</p>
+  <div id="fq-opts">
+    <div class="fq-opt" onclick="respFlagQuiz(this,'a')">A) As 13 listras da bandeira representam as colônias originais que declararam independência da Grã-Bretanha em 1776.</div>
+    <div class="fq-opt" onclick="respFlagQuiz(this,'b')">B) O número de estrelas na bandeira atual corresponde aos 50 estados que compõem os EUA.</div>
+    <div class="fq-opt" onclick="respFlagQuiz(this,'c')">C) A Grã-Bretanha reconheceu imediatamente a Declaração de Independência de 1776, assinando o tratado ainda naquele mesmo ano.</div>
+    <div class="fq-opt" onclick="respFlagQuiz(this,'d')">D) A cor vermelha na bandeira representa valor e perseverança; o branco, pureza e inocência; o azul, vigilância e justiça.</div>
+  </div>
+  <div class="fq-feedback" id="fq-feedback"></div>
+</div>
+
+<div class="enigma-box" id="enigma-2"><div class="enigma-header"><span class="enigma-icon">🔐</span><span class="enigma-title">ENIGMA Nº 2</span></div><div style="background:rgba(201,168,76,.08);border-left:3px solid #c9a84c;border-radius:6px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.82rem;color:#e8cc7a;line-height:1.7;"><strong>💡 Pista:</strong> Em 1773, colonos revoltados com o monopólio inglês do chá invadiram navios e jogaram 342 caixas ao mar. Esse ato ocorreu em um porto famoso da costa leste da América do Norte — uma cidade que também foi palco do Massacre de 1770, onde soldados britânicos abriram fogo contra colonos desarmados. Releia o texto acima e localize o nome desse porto.</div><p class="enigma-question">Em qual cidade ocorreu a Festa do Chá de 1773?</p><div class="enigma-options"><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">A) Nova York</div><div class="enigma-opt" onclick="respEnigma(2,this,true)" data-enig="2" data-correct="true">B) Boston</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">C) Filadélfia</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">D) Charleston</div></div><div class="enigma-feedback"></div></div><div class="enigma-header"><span class="enigma-icon">🔐</span><span class="enigma-title">ENIGMA Nº 2</span></div><div style="background:rgba(201,168,76,.08);border-left:3px solid #c9a84c;border-radius:6px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.82rem;color:#e8cc7a;line-height:1.7;"><strong>💡 Pista:</strong> Em 1773, colonos revoltados com o monopólio inglês do chá invadiram navios e jogaram 342 caixas ao mar. Esse ato ocorreu em um porto famoso da costa leste da América do Norte — uma cidade que também foi palco do Massacre de 1770, onde soldados britânicos abriram fogo contra colonos desarmados. Releia o texto acima e localize o nome desse porto.</div><p class="enigma-question">Em qual cidade ocorreu a Festa do Chá de 1773?</p><div class="enigma-options"><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">A) Nova York</div><div class="enigma-opt" onclick="respEnigma(2,this,true)" data-enig="2" data-correct="true">B) Boston</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">C) Filadélfia</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">D) Charleston</div></div><div class="enigma-feedback"></div></div><div class="nav-btn-wrapper"><button class="btn-continue locked" id="btn-next-2" disabled>Continuar</button><span class="lock-hint">Explore todos os eventos</span></div></div></section>
       
       <section id="screen-3" class="screen"><div class="screen-inner"><h2>🌍 Impactos no Mundo</h2><div class="impact-grid"><div class="impact-card modern"><h4>Moderno</h4><ul><li>Primeira colônia independente</li><li>Primeira república nas Américas</li></ul></div><div class="impact-card contemporary"><h4>Contemporâneo</h4><ul><li>Modelo constitucional global</li><li>Potência mundial</li></ul></div></div><div style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);padding:.6rem 1rem;border-radius:8px 8px 0 0;margin-top:1rem;"><p style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:.78rem;color:#0d0f0d;text-transform:uppercase;letter-spacing:.04em;">🗺️ AS 13 COLÔNIAS NO MAPA</p></div>
 <div class="content-card" style="border-radius:0 0 12px 12px;border-top:none;margin-bottom:1.2rem;padding:1rem .8rem;">
@@ -426,7 +563,7 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
       <li>Resposta correta, mas incompleta → <strong>até 30 XP</strong> (tempo não conta)</li>
       <li>Resposta insuficiente → <strong>0 XP</strong></li>
     </ul>
-    <div style="margin-top:.5rem;color:var(--crimson);"><strong>⏱ Tempo máximo: 10 minutos.</strong> Após isso, o envio será bloqueado!</div>
+    <div style="margin-top:.5rem;color:#f0c040;"><strong>⏱ Tempo máximo: 10 minutos.</strong> Após isso, o envio será bloqueado!</div>
   </div>
 
   <!-- Timer -->
@@ -746,12 +883,12 @@ function fazerCadastro() {
   if(senha.length<4){document.getElementById('msg-cadastro').textContent='Senha deve ter pelo menos 4 caracteres';return;}
   if(localStorage.getItem(CHAVE_AUTH+email.toLowerCase())){document.getElementById('msg-cadastro').textContent='E-mail já cadastrado';return;}
   try{localStorage.removeItem('oda_sessao_ativa');}catch(e){}
-  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[]};
+  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[],flagQuizOk:false};
   salvarLocal();
   iniciarApp();
   log('Cadastro realizado');
 }
-function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} if(!S.monitor) S.monitor={inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0}; if(!S.mapaClicado) S.mapaClicado=[]; if(!S.leituraOk) S.leituraOk={}; if(!S.leituraRapida) S.leituraRapida=[]; let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) restaurarPesquisa(); salvarLocal(); iniciarMonitoramento(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
+function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} if(!S.monitor) S.monitor={inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0}; if(!S.mapaClicado) S.mapaClicado=[]; if(!S.leituraOk) S.leituraOk={}; if(!S.leituraRapida) S.leituraRapida=[]; let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); restaurarFlagQuiz(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) restaurarPesquisa(); salvarLocal(); iniciarMonitoramento(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
 function sair() { try{ localStorage.removeItem('oda_sessao_ativa'); }catch(e){} document.getElementById('app-page').classList.remove('visivel'); document.getElementById('login-page').classList.remove('oculto'); irPagina('pg-login'); }
 function toggleNav() { document.getElementById('sidebar').classList.toggle('aberto'); document.getElementById('overlay-nav').classList.toggle('aberto'); }
 function fecharNav() { document.getElementById('sidebar').classList.remove('aberto'); document.getElementById('overlay-nav').classList.remove('aberto'); }
@@ -925,6 +1062,16 @@ function _aplicarResultadoPesquisa(result, tempoGasto, resposta) {
   desbloquearBtn('btn-next-3', 'hint-3', 'Continuar');
   salvarLocal();
   log('Pesquisa concluída: ' + status + ' (' + xpGanho + ' XP)');
+}
+
+function restaurarFlagQuiz() {
+  if(!S.flagQuizOk) return;
+  var opts = document.querySelectorAll('.fq-opt');
+  opts.forEach(function(o){ o.classList.add('fq-disabled'); });
+  var cOpt = document.querySelector('.fq-opt[onclick*="\'c\'"]');
+  if(cOpt) cOpt.classList.add('fq-correct-mark');
+  var fb = document.getElementById('fq-feedback');
+  if(fb) { fb.className='fq-feedback ok'; fb.innerHTML='✅ Já respondido corretamente!'; fb.style.display='block'; }
 }
 
 function restaurarPesquisa() {
@@ -1240,6 +1387,34 @@ function carregarPainelAlunos() {
 }
 function avancarParaAprofundamento() { if(!S.unlocked.includes(5))S.unlocked.push(5); irPara(5); }
 function avancarParaDestinoManifesto() { if(!S.unlocked.includes(6))S.unlocked.push(6); irPara(6); }
+
+// ========== QUIZ DA BANDEIRA ==========
+function respFlagQuiz(el, letra) {
+  var opts = document.querySelectorAll('.fq-opt');
+  opts.forEach(function(o){ o.classList.add('fq-disabled'); });
+  var fb = document.getElementById('fq-feedback');
+  var wrap = document.getElementById('flag-quiz-wrap');
+  if(letra === 'c') {
+    // CORRETA: C é a incorreta (a Grã-Bretanha NÃO reconheceu imediatamente)
+    el.classList.add('fq-wrong');
+    fb.className = 'fq-feedback ok';
+    fb.innerHTML = '✅ <strong>Correto!</strong> A alternativa C é a INCORRETA. O reconhecimento britânico só ocorreu em <strong>1783</strong>, após anos de guerra — não em 1776. +15 XP';
+    if(!S.flagQuizOk) {
+      S.flagQuizOk = true;
+      S.xp += 15;
+      atualizarHUD();
+      salvarLocal();
+    }
+  } else {
+    // Escolha errada — marca a verdadeira incorreta
+    el.classList.add('fq-wrong');
+    opts.forEach(function(o){ if(o.getAttribute('onclick').includes("'c'")) o.classList.add('fq-correct-mark'); });
+    fb.className = 'fq-feedback err';
+    fb.innerHTML = '❌ A alternativa <strong>C</strong> é a INCORRETA: a Grã-Bretanha só reconheceu a independência em <strong>1783</strong>, pelo Tratado de Paris — não em 1776.';
+    if(wrap) wrap.classList.add('pulse');
+  }
+  fb.style.display = 'block';
+}
 function verificarLacunas() { let btn=document.querySelector(".btn-verificar"); if(btn&&btn.disabled) return; let lacunas=document.querySelectorAll(".lacuna"), acertos=0; lacunas.forEach(l=>{ if(l.textContent.trim().toLowerCase()===l.getAttribute("data-resp").toLowerCase()){ l.classList.add("correta"); acertos++; } else { l.classList.add("errada"); l.textContent=l.getAttribute("data-resp"); } }); if(acertos>0) S.xp+=Math.round(40*acertos/lacunas.length); atualizarHUD(); salvarLocal(); if(btn){ btn.disabled=true; btn.style.opacity="0.4"; btn.style.cursor="not-allowed"; } }
 function finalizarAtividadeDM() { if(S.dmFinalizado) return; S.dmFinalizado=true; let r=document.getElementById('resultado-dm'); r.style.display='block'; r.innerHTML=`<h2>Resultado Final</h2><div>⭐⭐⭐</div><div>${document.querySelectorAll('.lacuna.correta').length} / ${document.querySelectorAll('.lacuna').length} pts</div><p>Parabéns!</p>`; document.querySelector('.btn-finalizar-dm').disabled=true; document.querySelector('.btn-finalizar-dm').style.opacity='0.4'; S.xp+=100; atualizarHUD(); salvarLocal(); }
 
