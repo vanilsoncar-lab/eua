@@ -1075,6 +1075,8 @@ function irPara(n) {
   if(!S.unlocked.includes(n)) S.unlocked.push(n);
   atualizarMenu(); salvarLocal();
   iniciarTemporizadorLeitura(n);
+  // Garante que a nova seção sempre abre do topo
+  try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch(e) { window.scrollTo(0, 0); }
 }
 
 function atualizarMenu() {
