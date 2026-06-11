@@ -424,13 +424,13 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
       <li>Resposta correta, mas incompleta → <strong>até 30 XP</strong> (tempo não conta)</li>
       <li>Resposta insuficiente → <strong>0 XP</strong></li>
     </ul>
-    <div style="margin-top:.5rem;color:var(--crimson);"><strong>⏱ Tempo máximo: 7 minutos.</strong> Após isso, o envio será bloqueado!</div>
+    <div style="margin-top:.5rem;color:var(--crimson);"><strong>⏱ Tempo máximo: 10 minutos.</strong> Após isso, o envio será bloqueado!</div>
   </div>
 
   <!-- Timer -->
   <div class="pesq-timer-wrap" id="pesq-timer-wrap" style="display:none;">
     <span style="font-family:'Montserrat',sans-serif;font-size:.75rem;color:rgba(255,255,255,.5);">Tempo:</span>
-    <span class="pesq-timer" id="pesq-timer-display">7:00</span>
+    <span class="pesq-timer" id="pesq-timer-display">10:00</span>
     <div class="pesq-timer-bar"><div class="pesq-timer-fill" id="pesq-timer-fill"></div></div>
   </div>
 
@@ -756,7 +756,7 @@ function confirmarReinicio() { document.getElementById('modal-reinicio').classLi
    PESQUISA TEMPORIZADA — Impactos da Independência
    ══════════════════════════════════════════════ */
 let _pesqTimer = null;
-let _pesqSegRestantes = 420; // 7 min = 420s
+let _pesqSegRestantes = 600; // 10 min = 600s
 let _pesqInicioTs = null;
 
 function iniciarPesquisa() {
@@ -768,21 +768,21 @@ function iniciarPesquisa() {
   document.getElementById('pesq-textarea').addEventListener('input', function() {
     document.getElementById('pesq-char-n').textContent = this.value.length;
   });
-  _pesqSegRestantes = 420;
+  _pesqSegRestantes = 600;
   _pesqInicioTs = Date.now();
   _pesqTimer = setInterval(_pesqTick, 500);
 }
 
 function _pesqTick() {
   var elapsed = Math.floor((Date.now() - _pesqInicioTs) / 1000);
-  _pesqSegRestantes = Math.max(0, 420 - elapsed);
+  _pesqSegRestantes = Math.max(0, 600 - elapsed);
   var min = Math.floor(_pesqSegRestantes / 60);
   var seg = _pesqSegRestantes % 60;
   var display = document.getElementById('pesq-timer-display');
   var fill = document.getElementById('pesq-timer-fill');
   if (!display) return;
   display.textContent = min + ':' + (seg < 10 ? '0' : '') + seg;
-  fill.style.width = (_pesqSegRestantes / 420 * 100) + '%';
+  fill.style.width = (_pesqSegRestantes / 600 * 100) + '%';
   if (_pesqSegRestantes <= 60) {
     display.classList.add('urgente');
     fill.classList.add('urgente');
@@ -801,6 +801,60 @@ function _bloquearPesquisa() {
   document.getElementById('pesq-bloqueado').style.display = 'block';
 }
 
+function _verificarPesquisaLocal(resposta) {
+  // Gabarito por grupos de palavras-chave — cada grupo representa 1 impacto
+  var grupos = [
+    // Impacto 1 — Inspiração para outras revoluções / Revolução Francesa
+    { nome: 'Inspiração para revoluções', palavras: ['revolução francesa','revolução na frança','inspirou','iluminismo','iluministas','liberdade','igualdade','fraternidade','rousseau','montesquieu','locke','voltaire','independência inspirou','modelo para','exemplo para'] },
+    // Impacto 2 — Modelo constitucional / democracia / república
+    { nome: 'Modelo constitucional e democrático', palavras: ['constituição','república','democracia','democrático','separação dos poderes','três poderes','executivo','legislativo','judiciário','direitos','declaração','carta','modelo de governo','sistema político'] },
+    // Impacto 3 — Expansão territorial / Doutrina Monroe / potência mundial
+    { nome: 'Expansão e potência mundial', palavras: ['doutrina monroe','destino manifesto','expansão','território','potência','influência mundial','imperialismo','colonialismo','independência das colônias','américa latina','países latino','nações americanas','pan-americanismo'] },
+    // Impacto 4 — Fim do colonialismo / ondas de independência nas Américas
+    { nome: 'Ondas de independência nas Américas', palavras: ['independência do brasil','independência da america','independências','colônias latino','libertação','anticolonialismo','descolonização','san martín','bolívar','independências na america'] },
+    // Impacto 5 — Comércio / capitalismo / liberalismo econômico
+    { nome: 'Liberalismo econômico', palavras: ['liberalismo','capitalismo','livre comércio','adam smith','mercado','economia','livre mercado','comércio livre','riqueza das nações'] },
+    // Impacto 6 — Direitos humanos / abolição / contradição da escravidão
+    { nome: 'Direitos humanos e contradições', palavras: ['direitos humanos','abolição','escravidão','escravo','negros','indígena','povos originários','igualdade racial','direitos civis','contradição','liberdade para todos'] }
+  ];
+
+  var texto = resposta.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos para comparação
+    .replace(/[^a-z0-9\s]/g, ' ');
+
+  var impactosEncontrados = [];
+  grupos.forEach(function(grupo) {
+    var achou = grupo.palavras.some(function(p) {
+      var pNorm = p.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return texto.indexOf(pNorm) !== -1;
+    });
+    if (achou) impactosEncontrados.push(grupo.nome);
+  });
+
+  // Remover duplicatas e pegar até 3
+  impactosEncontrados = impactosEncontrados.slice(0, 3);
+  var qtd = impactosEncontrados.length;
+  var minChars = resposta.length;
+
+  // Exige também tamanho mínimo razoável por impacto
+  var status, nota, feedback;
+  if (qtd >= 3 && minChars >= 120) {
+    status = 'completa';
+    nota = 85;
+    feedback = 'Excelente! Você identificou os três impactos corretamente. Continue assim — seu raciocínio histórico está ótimo!';
+  } else if (qtd >= 2 || (qtd >= 1 && minChars >= 80)) {
+    status = 'parcial';
+    nota = 40;
+    feedback = 'Boa tentativa! Você acertou parte dos impactos, mas a resposta ficou incompleta. Revise seu material e tente detalhar melhor cada impacto com exemplos.';
+  } else {
+    status = 'insuficiente';
+    nota = 0;
+    feedback = 'Sua resposta não contemplou os impactos esperados. Releia o conteúdo sobre a Independência dos EUA e tente novamente na próxima oportunidade!';
+  }
+
+  return { status: status, nota: nota, feedback: feedback, impactos_identificados: impactosEncontrados };
+}
+
 function enviarPesquisa() {
   var resposta = (document.getElementById('pesq-textarea').value || '').trim();
   if (resposta.length < 30) {
@@ -808,45 +862,17 @@ function enviarPesquisa() {
     return;
   }
   clearInterval(_pesqTimer);
-  var tempoGasto = Math.floor((Date.now() - _pesqInicioTs) / 1000); // segundos
+  var tempoGasto = Math.floor((Date.now() - _pesqInicioTs) / 1000);
   var btn = document.getElementById('pesq-send-btn');
   btn.disabled = true;
   btn.textContent = '⏳ Verificando...';
   document.getElementById('pesq-textarea').disabled = true;
 
-  var prompt = 'Você é um professor de História do 8° ano avaliando a resposta de um aluno sobre a Independência dos EUA.\n\n' +
-    'O aluno deveria listar e explicar 3 impactos da Independência dos EUA no mundo.\n\n' +
-    'Resposta do aluno: "' + resposta + '"\n\n' +
-    'Avalie e responda APENAS com JSON válido, sem markdown, neste formato:\n' +
-    '{"status":"completa"|"parcial"|"insuficiente","nota":0-100,"feedback":"mensagem curta e motivadora em português, no máximo 3 frases","impactos_identificados":["impacto1","impacto2","impacto3"]}\n\n' +
-    'Critérios:\n' +
-    '- "completa": 3 impactos claros e explicados (nota 70-100)\n' +
-    '- "parcial": 1-2 impactos ou impactos vagos sem explicação (nota 20-50)\n' +
-    '- "insuficiente": resposta fora do tema ou muito vaga (nota 0)\n' +
-    'Seja justo mas generoso com alunos de 8° ano.';
-
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    var text = (data.content || []).map(function(i){ return i.text || ''; }).join('');
-    var clean = text.replace(/```json|```/g, '').trim();
-    var result = JSON.parse(clean);
+  // Pequeno delay para dar feedback visual de "verificando"
+  setTimeout(function() {
+    var result = _verificarPesquisaLocal(resposta);
     _aplicarResultadoPesquisa(result, tempoGasto, resposta);
-  })
-  .catch(function(err) {
-    btn.disabled = false;
-    btn.textContent = '✔ ENVIAR RESPOSTA';
-    document.getElementById('pesq-textarea').disabled = false;
-    alert('Erro ao verificar. Tente novamente!');
-  });
+  }, 900);
 }
 
 function _aplicarResultadoPesquisa(result, tempoGasto, resposta) {
@@ -855,7 +881,7 @@ function _aplicarResultadoPesquisa(result, tempoGasto, resposta) {
 
   if (status === 'completa') {
     // Bônus de velocidade: escala de 100xp (≤90s) a 70xp (≥420s)
-    var fatorTempo = Math.max(0, Math.min(1, (420 - tempoGasto) / 330));
+    var fatorTempo = Math.max(0, Math.min(1, (600 - tempoGasto) / 510));
     xpGanho = Math.round(70 + fatorTempo * 30);
   } else if (status === 'parcial') {
     // Resposta incompleta → até 30 XP, sem bônus de tempo
@@ -884,7 +910,7 @@ function _aplicarResultadoPesquisa(result, tempoGasto, resposta) {
     atualizarHUD();
     xpEl.style.display = 'block';
     xpEl.style.color = status === 'completa' ? '#6effa0' : '#e8cc7a';
-    xpEl.textContent = '+' + xpGanho + ' XP' + (status === 'completa' && tempoGasto < 330 ? ' ⚡ (bônus velocidade!)' : '');
+    xpEl.textContent = '+' + xpGanho + ' XP' + (status === 'completa' && tempoGasto < 510 ? ' ⚡ (bônus velocidade!)' : '');
   }
 
   S.pesquisaConcluida = true;
