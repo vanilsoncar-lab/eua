@@ -278,6 +278,8 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
         <button class="btn-nav btn-sair" onclick="sair()">Sair</button>
         <button class="btn-nav btn-hist" onclick="verHistórico()">Ver histórico</button>
         <button class="btn-nav btn-hist" onclick="verPapeis()">🎖️ Papéis do jogo</button>
+        <button class="btn-nav btn-hist" style="border-color:rgba(128,255,0,.4);color:#80ff00;" onclick="abrirResumofinal()">📊 Resumo do Percurso</button>
+        <button class="btn-nav btn-reiniciar" onclick="confirmarNovaJornada()">🔄 Nova Jornada</button>
         <div class="nav-rodape" style="font-size:.45rem;color:rgba(255,255,255,.2);text-align:center;margin-top:.3rem;">Prof. Vanilson Cardoso · História Gamificada · v3.0</div>
       </div>
     </nav>
@@ -567,11 +569,14 @@ function atualizarHUD() {
 }
 
 function irPara(n) {
+  // verifica leitura da tela atual antes de trocar
+  if(S.tela && S.tela !== n) verificarLeituraAdequada(S.tela);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(`screen-${n}`)?.classList.add('active');
   S.tela=n;
   if(!S.unlocked.includes(n)) S.unlocked.push(n);
   atualizarMenu(); salvarLocal();
+  iniciarTemporizadorLeitura(n);
 }
 
 function atualizarMenu() {
@@ -741,12 +746,12 @@ function fazerCadastro() {
   if(senha.length<4){document.getElementById('msg-cadastro').textContent='Senha deve ter pelo menos 4 caracteres';return;}
   if(localStorage.getItem(CHAVE_AUTH+email.toLowerCase())){document.getElementById('msg-cadastro').textContent='E-mail já cadastrado';return;}
   try{localStorage.removeItem('oda_sessao_ativa');}catch(e){}
-  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[]};
+  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[]};
   salvarLocal();
   iniciarApp();
   log('Cadastro realizado');
 }
-function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} if(!S.monitor) S.monitor={inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0}; let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) restaurarPesquisa(); salvarLocal(); iniciarMonitoramento(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
+function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} if(!S.monitor) S.monitor={inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0}; if(!S.mapaClicado) S.mapaClicado=[]; if(!S.leituraOk) S.leituraOk={}; if(!S.leituraRapida) S.leituraRapida=[]; let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) restaurarPesquisa(); salvarLocal(); iniciarMonitoramento(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
 function sair() { try{ localStorage.removeItem('oda_sessao_ativa'); }catch(e){} document.getElementById('app-page').classList.remove('visivel'); document.getElementById('login-page').classList.remove('oculto'); irPagina('pg-login'); }
 function toggleNav() { document.getElementById('sidebar').classList.toggle('aberto'); document.getElementById('overlay-nav').classList.toggle('aberto'); }
 function fecharNav() { document.getElementById('sidebar').classList.remove('aberto'); document.getElementById('overlay-nav').classList.remove('aberto'); }
@@ -940,8 +945,8 @@ function restaurarPesquisa() {
   desbloquearBtn('btn-next-3', 'hint-3', 'Continuar');
 }
 
-function executarReinicio() { for(let k in S) if(!['nome','turma'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; S.pesquisaConcluida=false; S.pesquisaXp=0; S.pesquisaResposta=''; fecharModal('modal-reinicio'); location.reload(); }
-function verHistórico() { document.getElementById('hist-lista').innerHTML=S.hist.map(h=>`<div>${h.t} - ${h.e}</div>`).join('')||'<p>Nenhum evento.</p>'; document.getElementById('modal-hist').classList.add('aberto'); }
+function executarReinicio() { salvarHistoricoPercurso(); for(let k in S) if(!['nome','turma','email','senha','ano'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; S.pesquisaConcluida=false; S.pesquisaXp=0; S.pesquisaResposta=''; S.mapaClicado=[]; S.leituraOk={}; S.leituraRapida=[]; fecharModal('modal-reinicio'); location.reload(); }
+function verHistórico() { verHistoricoPercursos(); }
 function verPapeis() {
   let nivelAtual=getNivel(S.xp||0);
   let html=NIVEIS.map(n=>{
@@ -1252,9 +1257,302 @@ document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.colonia').forEach(function(c){ c.style.opacity='0.5'; });
       el.style.opacity='1';
       el.style.filter='brightness(1.4)';
+      // XP por clique no mapa (máx 13 colônias × 8 XP = 104 XP)
+      if(!S.mapaClicado) S.mapaClicado = [];
+      if(!S.mapaClicado.includes(nome)) {
+        S.mapaClicado.push(nome);
+        S.xp += 8;
+        atualizarHUD();
+        salvarLocal();
+      }
     });
   });
 });
+
+// ==================== TEMPORIZADOR DE LEITURA ====================
+var _leituraTimers = {}; // { screenId: { inicio: timestamp, xpDado: bool } }
+var _LEITURA_MINIMA = { 1: 60, 2: 90, 3: 70, 4: 50, 5: 40, 6: 30 }; // segundos mínimos por tela
+var _LEITURA_XP = 20; // XP ganho por leitura adequada
+
+function iniciarTemporizadorLeitura(screenId) {
+  if(!_leituraTimers[screenId]) {
+    _leituraTimers[screenId] = { inicio: Date.now(), xpDado: false };
+  }
+}
+
+function verificarLeituraAdequada(screenId) {
+  var timer = _leituraTimers[screenId];
+  if(!timer || timer.xpDado) return;
+  var tempoPassado = Math.floor((Date.now() - timer.inicio) / 1000);
+  var minimo = _LEITURA_MINIMA[screenId] || 30;
+  if(tempoPassado >= minimo) {
+    timer.xpDado = true;
+    if(!S.leituraOk) S.leituraOk = {};
+    if(!S.leituraOk[screenId]) {
+      S.leituraOk[screenId] = true;
+      S.xp += _LEITURA_XP;
+      atualizarHUD();
+      salvarLocal();
+    }
+  } else {
+    // Penalidade por leitura rápida demais (menos de 10s)
+    if(tempoPassado < 10) {
+      if(!S.leituraRapida) S.leituraRapida = [];
+      if(!S.leituraRapida.includes(screenId)) {
+        S.leituraRapida.push(screenId);
+        S.xp = Math.max(0, S.xp - 5);
+        atualizarHUD();
+        salvarLocal();
+      }
+    }
+  }
+}
+
+// ==================== HISTÓRICO DE PERCURSOS ====================
+function salvarHistoricoPercurso() {
+  var percurso = {
+    id: Date.now(),
+    data: new Date().toLocaleDateString('pt-BR'),
+    hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
+    xp: S.xp,
+    nivel: getNivel(S.xp).nome,
+    filósofos: (S.philoAbertos||[]).length,
+    eventos: (S.tlRevelados||[]).length,
+    enigmas: (S.enigResp||[]).length,
+    checklist: (S.checkDone||[]).length,
+    mapaClicado: (S.mapaClicado||[]).length,
+    leituraOk: Object.keys(S.leituraOk||{}).length,
+    dmFinalizado: !!S.dmFinalizado,
+    pesquisaStatus: S.pesquisaConcluida ? 'concluída' : 'não concluída',
+    penalXp: (S.monitor && S.monitor.penalXpTotal) || 0,
+    faseFinal: Math.max(...(S.unlocked||[1]))
+  };
+  var chaveHistorico = 'oda_hist_' + S.email.toLowerCase();
+  var historico = [];
+  try { historico = JSON.parse(localStorage.getItem(chaveHistorico)) || []; } catch(e) {}
+  historico.unshift(percurso);
+  if(historico.length > 10) historico = historico.slice(0, 10);
+  try { localStorage.setItem(chaveHistorico, JSON.stringify(historico)); } catch(e) {}
+  return percurso;
+}
+
+function verHistoricoPercursos() {
+  var chaveHistorico = 'oda_hist_' + (S.email||'').toLowerCase();
+  var historico = [];
+  try { historico = JSON.parse(localStorage.getItem(chaveHistorico)) || []; } catch(e) {}
+  
+  // Também busca histórico de colegas da mesma turma/ano
+  var turmaHistoricos = [];
+  for(var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if(k && k.startsWith('oda_hist_')) {
+      var emailH = k.replace('oda_hist_', '');
+      if(emailH === (S.email||'').toLowerCase()) continue;
+      try {
+        var dadosAluno = JSON.parse(localStorage.getItem(CHAVE_AUTH + emailH));
+        if(dadosAluno && (dadosAluno.turma||'') === (S.turma||'') && (dadosAluno.ano||'') === (S.ano||'')) {
+          var histColega = JSON.parse(localStorage.getItem(k)) || [];
+          if(histColega.length > 0) {
+            turmaHistoricos.push({ nome: dadosAluno.nome, percursos: histColega });
+          }
+        }
+      } catch(e) {}
+    }
+  }
+  
+  var html = '';
+  if(historico.length === 0) {
+    html = '<p style="color:#aaa;text-align:center;padding:1rem;">Nenhum percurso concluído ainda.</p>';
+  } else {
+    html = '<div style="margin-bottom:1rem;"><div style="font-family:\'Press Start 2P\',monospace;font-size:.55rem;color:#80ff00;margin-bottom:.5rem;">SEUS PERCURSOS</div>';
+    historico.forEach(function(p, idx) {
+      html += '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.6rem .8rem;margin-bottom:.4rem;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+        + '<span style="font-size:.7rem;color:#c9a84c;">Jornada #' + (historico.length - idx) + '</span>'
+        + '<span style="font-size:.65rem;color:#aaa;">' + p.data + ' ' + p.hora + '</span>'
+        + '</div>'
+        + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.6rem;color:#80ff00;margin:.3rem 0;">' + p.xp + ' XP — ' + p.nivel + '</div>'
+        + '<div style="font-size:.7rem;color:#d1e3f8;">📚 ' + p.filósofos + '/6 fil. · ⏱ ' + p.eventos + '/7 eventos · 🗺 ' + p.mapaClicado + '/13 col. · 🔐 ' + p.enigmas + '/4 enig.</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+  
+  if(turmaHistoricos.length > 0) {
+    html += '<div style="border-top:1px solid rgba(255,255,255,.1);padding-top:.7rem;"><div style="font-family:\'Press Start 2P\',monospace;font-size:.5rem;color:#c9a84c;margin-bottom:.5rem;">COLEGAS DA TURMA ' + (S.turma||'') + '/' + (S.ano||'') + '</div>';
+    turmaHistoricos.forEach(function(col) {
+      var ultimo = col.percursos[0];
+      html += '<div style="background:rgba(255,255,255,.03);border-radius:6px;padding:.5rem .7rem;margin-bottom:.3rem;">'
+        + '<div style="font-size:.78rem;font-weight:600;color:#fff;">' + col.nome + '</div>'
+        + '<div style="font-size:.68rem;color:#aaa;">' + col.percursos.length + ' jornada(s) · Última: ' + ultimo.xp + ' XP em ' + ultimo.data + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+  
+  document.getElementById('hist-lista').innerHTML = html;
+  document.getElementById('modal-hist').classList.add('aberto');
+}
+
+// ==================== NOVA JORNADA (reinício sem acumular XP) ====================
+function novaJornada() {
+  // Salva o percurso atual antes de reiniciar
+  salvarHistoricoPercurso();
+  // Reseta apenas o progresso, mantendo cadastro
+  var dados = { nome: S.nome, email: S.email, turma: S.turma, ano: S.ano, senha: S.senha };
+  S = Object.assign(dados, {
+    xp: 0, philoAbertos: [], tlRevelados: [], notaOk: false,
+    pesquisaConcluida: false, pesquisaXp: 0, pesquisaResposta: '',
+    checkDone: [], unlocked: [1], tela: 1, hist: [], enigResp: [],
+    dmFinalizado: false, mapaClicado: [], leituraOk: {}, leituraRapida: [],
+    monitor: { inicioSessao: null, saidasAba: 0, tempoForaSeg: 0, saidasFullscreen: 0, penalXpTotal: 0 }
+  });
+  _leituraTimers = {};
+  salvarLocal();
+  fecharModal('modal-nova-jornada');
+  location.reload();
+}
+
+function confirmarNovaJornada() {
+  document.getElementById('modal-nova-jornada').classList.add('aberto');
+}
+
+// ==================== RESUMO FINAL DO PERCURSO ====================
+function abrirResumofinal() {
+  var nivel = getNivel(S.xp);
+  
+  // Habilidades adquiridas
+  var habilidades = [];
+  if(S.philoAbertos && S.philoAbertos.length >= 4) habilidades.push('Identificar e relacionar os principais pensadores iluministas e suas contribuições');
+  if(S.tlRevelados && S.tlRevelados.length >= 5) habilidades.push('Compreender a cronologia dos eventos que levaram à Independência dos EUA');
+  if(S.enigResp && S.enigResp.length >= 2) habilidades.push('Analisar fontes históricas e aplicar raciocínio crítico na resolução de questões');
+  if(S.checkDone && S.checkDone.length >= 7) habilidades.push('Sistematizar os conhecimentos sobre o Iluminismo e a Independência Americana');
+  if(S.pesquisaConcluida) habilidades.push('Pesquisar e argumentar sobre os impactos históricos da Independência dos EUA no mundo');
+  if(S.mapaClicado && S.mapaClicado.length >= 8) habilidades.push('Localizar e identificar as 13 colônias no mapa e seus contextos históricos');
+  if(S.dmFinalizado) habilidades.push('Compreender o conceito de Destino Manifesto e a expansão territorial dos EUA');
+  
+  // O que precisa melhorar
+  var melhorar = [];
+  if(!S.philoAbertos || S.philoAbertos.length < 6) melhorar.push('Explorar todos os filósofos iluministas (' + (S.philoAbertos||[]).length + '/6 abertos)');
+  if(!S.tlRevelados || S.tlRevelados.length < 7) melhorar.push('Explorar toda a linha do tempo (' + (S.tlRevelados||[]).length + '/7 eventos)');
+  if(!S.mapaClicado || S.mapaClicado.length < 13) melhorar.push('Clicar em todas as colônias no mapa (' + (S.mapaClicado||[]).length + '/13 clicadas)');
+  if(!S.checkDone || S.checkDone.length < 10) melhorar.push('Completar o checklist de aprendizagem (' + (S.checkDone||[]).length + '/10 itens)');
+  if(!S.pesquisaConcluida) melhorar.push('Concluir a atividade de pesquisa sobre os impactos da Independência');
+  if(!S.dmFinalizado) melhorar.push('Finalizar a atividade do Destino Manifesto');
+  if(S.leituraRapida && S.leituraRapida.length > 0) melhorar.push('Dedicar mais tempo à leitura dos conteúdos (leitura rápida detectada em ' + S.leituraRapida.length + ' tela(s))');
+  if(S.monitor && S.monitor.penalXpTotal > 0) melhorar.push('Manter o foco na atividade (total de ' + S.monitor.penalXpTotal + ' XP perdidos por saídas)');
+  
+  // Gabarito dos enigmas
+  var gabarito = [
+    { num: 1, enunciado: 'Soberania popular', resposta: 'C) Rousseau', ok: S.enigResp && S.enigResp.includes(1) },
+    { num: 2, enunciado: 'Cidade da Festa do Chá', resposta: 'B) Boston', ok: S.enigResp && S.enigResp.includes(2) },
+    { num: 3, enunciado: 'Revolução inspirada pelos EUA', resposta: 'B) Francesa', ok: S.enigResp && S.enigResp.includes(3) },
+    { num: 4, enunciado: 'Doutrina de 1823', resposta: 'B) Monroe', ok: S.enigResp && S.enigResp.includes(4) }
+  ];
+  
+  // Etapas puladas
+  var etapasPuladas = [];
+  if(!S.unlocked || !S.unlocked.includes(2)) etapasPuladas.push('A Independência (Tela 2)');
+  if(!S.unlocked || !S.unlocked.includes(3)) etapasPuladas.push('Impactos no Mundo (Tela 3)');
+  if(!S.unlocked || !S.unlocked.includes(4)) etapasPuladas.push('Sistematização (Tela 4)');
+  if(!S.unlocked || !S.unlocked.includes(5)) etapasPuladas.push('Aprofundamento (Tela 5)');
+  if(!S.unlocked || !S.unlocked.includes(6)) etapasPuladas.push('Destino Manifesto (Tela 6)');
+  
+  // Ranking da turma
+  var minhaTurma = S.turma || '';
+  var meuAno = S.ano || '';
+  var alunosTurma = [];
+  for(var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if(k && k.startsWith(CHAVE_AUTH)) {
+      var emailR = k.replace(CHAVE_AUTH, '');
+      if(emailR === PROF_EMAIL) continue;
+      try {
+        var obj = JSON.parse(localStorage.getItem(k));
+        if((obj.turma||'') === minhaTurma && (obj.ano||'') === meuAno) alunosTurma.push(obj);
+      } catch(e) {}
+    }
+  }
+  alunosTurma.sort(function(a,b){ return (b.xp||0)-(a.xp||0); });
+  var minhaPos = alunosTurma.findIndex(function(a){ return a.email === S.email; }) + 1;
+  
+  var html = '<div style="text-align:center;margin-bottom:1.2rem;">'
+    + '<div style="font-size:2rem;">' + nivel.av + '</div>'
+    + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.65rem;color:#c9a84c;margin:.4rem 0;">' + nivel.nome + '</div>'
+    + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.8rem;color:#80ff00;">' + S.xp + ' XP</div>'
+    + '</div>';
+  
+  // Habilidades adquiridas
+  if(habilidades.length > 0) {
+    html += '<div style="margin-bottom:1rem;">'
+      + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.55rem;color:#6effa0;margin-bottom:.5rem;">✅ HABILIDADES ADQUIRIDAS</div>';
+    habilidades.forEach(function(h) {
+      html += '<div style="background:rgba(46,204,113,.08);border-left:3px solid #2ecc71;border-radius:4px;padding:.4rem .7rem;margin-bottom:.3rem;font-size:.78rem;color:#d1e3f8;">' + h + '</div>';
+    });
+    html += '</div>';
+  }
+  
+  // O que melhorar
+  if(melhorar.length > 0) {
+    html += '<div style="margin-bottom:1rem;">'
+      + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.55rem;color:#f0c040;margin-bottom:.5rem;">⚠️ PONTOS A DESENVOLVER</div>';
+    melhorar.forEach(function(m) {
+      html += '<div style="background:rgba(240,192,64,.08);border-left:3px solid #f0c040;border-radius:4px;padding:.4rem .7rem;margin-bottom:.3rem;font-size:.78rem;color:#d1e3f8;">' + m + '</div>';
+    });
+    html += '</div>';
+  }
+  
+  // Gabarito
+  html += '<div style="margin-bottom:1rem;">'
+    + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.55rem;color:#91c7ff;margin-bottom:.5rem;">🔐 GABARITO DOS ENIGMAS</div>'
+    + '<div style="background:rgba(255,255,255,.04);border-radius:8px;overflow:hidden;">';
+  gabarito.forEach(function(g) {
+    var cor = g.ok ? '#6effa0' : '#aaa';
+    var ico = g.ok ? '✅' : '⬜';
+    html += '<div style="display:flex;align-items:center;gap:.6rem;padding:.4rem .7rem;border-bottom:1px solid rgba(255,255,255,.05);">'
+      + '<span>' + ico + '</span>'
+      + '<div style="flex:1;font-size:.75rem;color:#d1e3f8;">' + g.enunciado + '</div>'
+      + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.5rem;color:' + cor + ';">' + g.resposta + '</div>'
+      + '</div>';
+  });
+  html += '</div></div>';
+  
+  // Etapas puladas
+  if(etapasPuladas.length > 0) {
+    html += '<div style="margin-bottom:1rem;">'
+      + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.5rem;color:#ff9090;margin-bottom:.5rem;">⏭ ETAPAS SEM INTERAÇÃO</div>';
+    etapasPuladas.forEach(function(e) {
+      html += '<div style="font-size:.75rem;color:#ff9090;padding:.2rem .4rem;">• ' + e + '</div>';
+    });
+    html += '</div>';
+  }
+  
+  // Ranking da turma
+  if(alunosTurma.length > 1) {
+    html += '<div style="margin-bottom:1rem;">'
+      + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.5rem;color:#c9a84c;margin-bottom:.5rem;">🏆 RANKING TURMA ' + minhaTurma + '/' + meuAno + ' — ' + alunosTurma.length + ' alunos</div>'
+      + '<div style="font-size:.75rem;color:#91c7ff;margin-bottom:.4rem;">Sua posição: <strong style="color:#80ff00;">' + minhaPos + 'º lugar</strong></div>';
+    alunosTurma.slice(0, 5).forEach(function(a, i) {
+      var euStyle = a.email === S.email ? 'background:rgba(128,255,0,.08);border:1px solid rgba(128,255,0,.3);' : 'background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);';
+      var podio = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'º';
+      html += '<div style="' + euStyle + 'border-radius:6px;padding:.35rem .6rem;margin-bottom:.2rem;display:flex;align-items:center;gap:.5rem;">'
+        + '<span style="font-size:.8rem;min-width:1.4rem;">' + podio + '</span>'
+        + '<span style="flex:1;font-size:.75rem;color:#fff;">' + a.nome + (a.email===S.email?' ← você':'') + '</span>'
+        + '<span style="font-family:\'Press Start 2P\',monospace;font-size:.5rem;color:#80ff00;">' + (a.xp||0) + ' XP</span>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+  
+  // Botão nova jornada
+  html += '<div style="text-align:center;margin-top:1.2rem;">'
+    + '<p style="font-size:.78rem;color:#aaa;margin-bottom:.8rem;line-height:1.5;">Quer recomeçar do zero e tentar melhorar sua pontuação?</p>'
+    + '<button onclick="fecharModal(\'modal-resumo\');confirmarNovaJornada();" style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);color:#0d1f3c;border:none;padding:.7rem 1.8rem;border-radius:30px;font-family:\'Montserrat\',sans-serif;font-weight:900;font-size:.85rem;cursor:pointer;">🔄 NOVA JORNADA</button>'
+    + '</div>';
+  
+  document.getElementById('resumo-conteudo').innerHTML = html;
+  document.getElementById('modal-resumo').classList.add('aberto');
+}
 
 // ==================== RANKING DO PROFESSOR ====================
 function abrirRankingProf() {
@@ -1414,6 +1712,8 @@ function abrirRanking() {
         <li>Sair da aba ou janela <strong>desconta XP</strong> após 30 segundos.</li>
         <li>O professor é notificado sobre cada saída e o tempo fora.</li>
         <li>Saídas involuntárias curtas (menos de 30s) não têm penalidade.</li>
+        <li><strong style="color:#e8cc7a;">⚠️ Atenção:</strong> Algumas atividades <strong>não têm orientações explícitas</strong>, como clicar nas colônias do mapa e explorar os conteúdos com atenção. Cada interação acumula XP — e <strong>deixar de interagir pode reduzir sua pontuação!</strong></li>
+        <li>O <strong>tempo de leitura</strong> também é avaliado: leituras muito rápidas indicam que o conteúdo não foi lido com atenção.</li>
       </ul>
       <div style="font-size:.75rem;color:#aaa;margin-top:.5rem;">Tabela de penalidades: 30s–2min = −10 XP · 2–5min = −25 XP · 5–10min = −50 XP · +10min = −100 XP</div>
     </div>
@@ -1444,6 +1744,29 @@ function abrirRanking() {
     </div>
     <div id="ranking-turma-label" style="font-size:.78rem;color:#91c7ff;margin-bottom:.8rem;text-align:center;"></div>
     <div id="ranking-lista"></div>
+  </div>
+</div>
+<!-- Modal de Resumo Final -->
+<div class="modal-fundo" id="modal-resumo" style="z-index:5500;align-items:flex-start;padding-top:0;overflow-y:auto;">
+  <div style="background:linear-gradient(160deg,#0a1628,#0d1f3c);border:2px solid #c9a84c;max-width:520px;width:95%;margin:auto;padding:1.5rem 1.2rem 1.2rem;border-radius:12px;position:relative;max-height:96vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <span style="font-family:'Press Start 2P',monospace;font-size:.7rem;color:#c9a84c;">📊 RESUMO DO PERCURSO</span>
+      <button onclick="fecharModal('modal-resumo')" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;">×</button>
+    </div>
+    <div id="resumo-conteudo"></div>
+  </div>
+</div>
+
+<!-- Modal de Nova Jornada -->
+<div class="modal-fundo" id="modal-nova-jornada" style="z-index:5600;">
+  <div class="modal-caixa">
+    <span>🔄</span>
+    <div class="modal-titulo">NOVA JORNADA?</div>
+    <p style="font-size:.8rem;color:#d1e3f8;line-height:1.5;margin:.5rem 0;">Seu percurso atual será salvo no histórico. Você começará uma nova contagem de XP do zero.</p>
+    <div class="modal-btns">
+      <button class="btn-sim" onclick="novaJornada()">Começar Nova!</button>
+      <button class="btn-não" onclick="fecharModal('modal-nova-jornada')">Cancelar</button>
+    </div>
   </div>
 </div>
 
