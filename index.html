@@ -731,79 +731,146 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
           <p style="font-size:.82rem;color:#aaa;margin-bottom:.8rem;">Clique em cada período para revelar a expansão no mapa. Cada etapa vale <strong style="color:#80ff00;">+6 XP</strong>.</p>
           <div class="exp-wrap">
             <div class="exp-map-box">
-              <svg id="exp-map" viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg">
-                <!-- Fundo oceano -->
-                <rect width="520" height="340" fill="#0a1628"/>
-                <!-- Canadá (referência) -->
-                <path d="M30,10 L490,10 L490,80 L30,80 Z" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
-                <text x="260" y="50" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.2)" font-family="sans-serif">CANADÁ</text>
-                <!-- México (referência) -->
-                <path d="M80,255 L350,255 L350,320 L80,320 Z" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
-                <text x="215" y="292" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.2)" font-family="sans-serif">MÉXICO</text>
-                <!-- Atlântico -->
-                <text x="460" y="200" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.12)" font-family="sans-serif" transform="rotate(-90,460,200)">ATLÂNTICO</text>
-                <!-- Pacífico -->
-                <text x="20" y="200" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.12)" font-family="sans-serif" transform="rotate(-90,20,200)">PACÍFICO</text>
+              <svg id="exp-map" viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <filter id="glow-map">
+                    <feGaussianBlur stdDeviation="2" result="blur"/>
+                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                  </filter>
+                </defs>
 
-                <!-- CAMADAS DE EXPANSÃO (inicialmente ocultas) -->
-                <!-- 1: 13 colônias originais 1783 -->
+                <!-- Fundo oceano -->
+                <rect width="640" height="420" fill="#071220"/>
+
+                <!-- Água / oceanos suaves -->
+                <rect x="0" y="0" width="640" height="420" fill="url(#ocean)" opacity="0.4"/>
+
+                <!-- CANADÁ (referência geográfica) -->
+                <path d="M50,10 L590,10 L590,95 L540,95 L520,88 L480,92 L440,85 L400,90 L360,85 L320,90 L280,85 L240,88 L200,84 L160,90 L120,85 L80,90 L50,85 Z"
+                      fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
+                <text x="320" y="58" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.18)" font-family="sans-serif" letter-spacing="3">C A N A D Á</text>
+
+                <!-- MÉXICO (referência geográfica) -->
+                <path d="M100,310 L100,310 L115,308 L140,312 L170,310 L200,308 L230,310 L260,308 L290,310 L310,318 L330,330 L350,345 L360,360 L355,375 L340,385 L310,390 L280,388 L250,382 L220,370 L195,355 L175,340 L155,325 L130,318 L110,315 Z"
+                      fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
+                <text x="230" y="355" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.16)" font-family="sans-serif" letter-spacing="2">M É X I C O</text>
+
+                <!-- CUBA (referência) -->
+                <ellipse cx="430" cy="355" rx="35" ry="10" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.06)" stroke-width=".5"/>
+
+                <!-- Rótulos oceanos -->
+                <text x="28" y="220" text-anchor="middle" font-size="8" fill="rgba(145,199,255,.18)" font-family="sans-serif" transform="rotate(-90,28,220)" letter-spacing="2">P A C Í F I C O</text>
+                <text x="612" y="220" text-anchor="middle" font-size="8" fill="rgba(145,199,255,.18)" font-family="sans-serif" transform="rotate(90,612,220)" letter-spacing="2">A T L Â N T I C O</text>
+
+                <!-- Golfo do México -->
+                <text x="430" y="310" text-anchor="middle" font-size="7.5" fill="rgba(145,199,255,.15)" font-family="sans-serif">Golfo do México</text>
+
+                <!-- ============================================ -->
+                <!-- CAMADAS DE EXPANSÃO – formas geográficas     -->
+                <!-- ============================================ -->
+
+                <!-- LAYER 1: 13 Colônias Originais (1783) -->
+                <!-- Região Leste, do Maine até Geórgia -->
                 <g id="exp-layer-1" style="display:none">
-                  <path d="M370,82 L490,82 L490,240 L370,240 Z" fill="rgba(41,128,185,.55)" stroke="#91c7ff" stroke-width="1"/>
-                  <text x="430" y="165" text-anchor="middle" font-size="7.5" fill="white" font-family="sans-serif" font-weight="bold">COLÔNIAS</text>
-                  <text x="430" y="175" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif">1783</text>
+                  <path d="M490,95 L530,95 L540,102 L548,115 L552,130 L550,148 L545,165 L538,182 L528,198 L515,212 L500,224 L485,232 L470,238 L455,242 L440,244 L428,243 L420,238 L415,228 L418,215 L425,200 L430,185 L432,168 L430,152 L428,135 L425,118 L422,105 L426,96 Z"
+                        fill="rgba(41,128,185,.55)" stroke="#91c7ff" stroke-width="1.2" filter="url(#glow-map)"/>
+                  <text x="484" y="170" text-anchor="middle" font-size="9" fill="white" font-family="sans-serif" font-weight="bold">COLÔNIAS</text>
+                  <text x="484" y="183" text-anchor="middle" font-size="8" fill="rgba(200,230,255,.8)" font-family="sans-serif">1783</text>
                 </g>
-                <!-- 2: Compra da Louisiana 1803 -->
+
+                <!-- LAYER 2: Compra da Louisiana (1803) -->
+                <!-- Grande região central, do Mississippi ao Missouri/Arkansas -->
                 <g id="exp-layer-2" style="display:none">
-                  <path d="M200,82 L370,82 L370,220 L200,220 Z" fill="rgba(46,204,113,.5)" stroke="#6effa0" stroke-width="1"/>
-                  <text x="285" y="150" text-anchor="middle" font-size="7.5" fill="white" font-family="sans-serif" font-weight="bold">LOUISIANA</text>
-                  <text x="285" y="160" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif">1803</text>
+                  <path d="M250,95 L415,95 L422,105 L425,118 L428,135 L430,152 L432,168 L430,185 L425,200 L418,215 L415,228 L412,240 L408,252 L400,262 L385,268 L368,270 L350,272 L330,272 L310,270 L292,265 L278,258 L265,248 L255,235 L248,220 L244,204 L240,188 L238,170 L237,150 L238,130 L240,112 L244,100 Z"
+                        fill="rgba(46,204,113,.5)" stroke="#6effa0" stroke-width="1.2" filter="url(#glow-map)"/>
+                  <text x="335" y="175" text-anchor="middle" font-size="9" fill="white" font-family="sans-serif" font-weight="bold">LOUISIANA</text>
+                  <text x="335" y="188" text-anchor="middle" font-size="8" fill="rgba(200,255,220,.8)" font-family="sans-serif">1803</text>
                 </g>
-                <!-- 3: Flórida 1819 -->
+
+                <!-- LAYER 3: Flórida (1819) -->
                 <g id="exp-layer-3" style="display:none">
-                  <path d="M390,220 L480,220 L480,275 L420,275 L390,255 Z" fill="rgba(155,89,182,.6)" stroke="#c39bd3" stroke-width="1"/>
-                  <text x="435" y="250" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="bold">FLÓRIDA</text>
-                  <text x="435" y="260" text-anchor="middle" font-size="6.5" fill="white" font-family="sans-serif">1819</text>
+                  <path d="M420,238 L435,242 L448,244 L462,246 L472,250 L478,258 L482,270 L480,285 L472,298 L462,308 L450,315 L438,318 L426,315 L418,305 L415,293 L415,280 L416,268 L414,255 L415,245 Z"
+                        fill="rgba(155,89,182,.6)" stroke="#c39bd3" stroke-width="1.2" filter="url(#glow-map)"/>
+                  <text x="447" y="278" text-anchor="middle" font-size="8.5" fill="white" font-family="sans-serif" font-weight="bold">FLÓRIDA</text>
+                  <text x="447" y="290" text-anchor="middle" font-size="7.5" fill="rgba(220,200,255,.8)" font-family="sans-serif">1819</text>
                 </g>
-                <!-- 4: Texas 1845 -->
+
+                <!-- LAYER 4: Texas (1845) -->
                 <g id="exp-layer-4" style="display:none">
-                  <path d="M160,210 L280,210 L280,275 L160,275 Z" fill="rgba(230,126,34,.55)" stroke="#f39c12" stroke-width="1"/>
-                  <text x="220" y="245" text-anchor="middle" font-size="7.5" fill="white" font-family="sans-serif" font-weight="bold">TEXAS</text>
-                  <text x="220" y="256" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif">1845</text>
+                  <path d="M200,242 L245,238 L265,248 L278,258 L292,265 L300,270 L305,280 L308,295 L305,310 L298,325 L285,338 L270,345 L252,348 L232,345 L215,338 L202,325 L193,308 L188,290 L188,272 L192,255 Z"
+                        fill="rgba(230,126,34,.58)" stroke="#f39c12" stroke-width="1.2" filter="url(#glow-map)"/>
+                  <text x="248" y="290" text-anchor="middle" font-size="9" fill="white" font-family="sans-serif" font-weight="bold">TEXAS</text>
+                  <text x="248" y="303" text-anchor="middle" font-size="7.5" fill="rgba(255,220,160,.8)" font-family="sans-serif">1845</text>
                 </g>
-                <!-- 5: Oregon 1846 -->
+
+                <!-- LAYER 5: Oregon (1846) -->
+                <!-- Noroeste: Washington, Oregon, Idaho -->
                 <g id="exp-layer-5" style="display:none">
-                  <path d="M30,82 L140,82 L140,165 L30,165 Z" fill="rgba(52,152,219,.55)" stroke="#7fb3d3" stroke-width="1"/>
-                  <text x="85" y="125" text-anchor="middle" font-size="7.5" fill="white" font-family="sans-serif" font-weight="bold">OREGON</text>
-                  <text x="85" y="136" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif">1846</text>
+                  <path d="M50,95 L180,95 L192,100 L198,112 L200,128 L198,145 L194,160 L188,172 L178,180 L165,185 L148,188 L130,188 L112,185 L96,178 L82,168 L70,155 L60,140 L52,122 L50,108 Z"
+                        fill="rgba(52,152,219,.55)" stroke="#7fb3d3" stroke-width="1.2" filter="url(#glow-map)"/>
+                  <text x="125" y="140" text-anchor="middle" font-size="9" fill="white" font-family="sans-serif" font-weight="bold">OREGON</text>
+                  <text x="125" y="153" text-anchor="middle" font-size="7.5" fill="rgba(190,225,255,.8)" font-family="sans-serif">1846</text>
                 </g>
-                <!-- 6: Sudoeste (México) 1848 -->
+
+                <!-- LAYER 6: Cedido pelo México / Sudoeste (1848) -->
+                <!-- Califórnia, Nevada, Utah, Arizona, Novo México, Colorado -->
                 <g id="exp-layer-6" style="display:none">
-                  <path d="M30,165 L200,165 L200,255 L80,255 L30,220 Z" fill="rgba(231,76,60,.5)" stroke="#e74c3c" stroke-width="1"/>
-                  <text x="115" y="212" text-anchor="middle" font-size="7.5" fill="white" font-family="sans-serif" font-weight="bold">SUDOESTE</text>
-                  <text x="115" y="222" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif">1848</text>
+                  <path d="M50,188 L165,185 L178,180 L188,172 L194,160 L198,145 L200,128 L198,112 L200,188 L198,205 L194,222 L188,238 L182,252 L174,262 L160,268 L144,270 L126,270 L108,266 L90,258 L75,248 L62,236 L52,220 L50,205 Z"
+                        fill="rgba(231,76,60,.5)" stroke="#e74c3c" stroke-width="1.2" filter="url(#glow-map)"/>
+                  <text x="125" y="215" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="bold">CEDIDO PELO</text>
+                  <text x="125" y="227" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="bold">MÉXICO</text>
+                  <text x="125" y="240" text-anchor="middle" font-size="7" fill="rgba(255,190,180,.8)" font-family="sans-serif">1848</text>
                 </g>
-                <!-- 7: Compra de Gadsden 1853 -->
+
+                <!-- LAYER 7: Compra de Gadsden (1853) -->
+                <!-- Faixa sul do Arizona e Novo México -->
                 <g id="exp-layer-7" style="display:none">
-                  <path d="M80,255 L200,255 L200,275 L80,275 Z" fill="rgba(241,196,15,.5)" stroke="#f1c40f" stroke-width="1"/>
-                  <text x="140" y="267" text-anchor="middle" font-size="6.5" fill="white" font-family="sans-serif" font-weight="bold">GADSDEN 1853</text>
+                  <path d="M108,266 L188,262 L192,272 L190,285 L185,292 L175,295 L155,296 L130,295 L112,290 L104,280 Z"
+                        fill="rgba(241,196,15,.55)" stroke="#f1c40f" stroke-width="1.2" filter="url(#glow-map)"/>
+                  <text x="148" y="282" text-anchor="middle" font-size="7.5" fill="white" font-family="sans-serif" font-weight="bold">GADSDEN 1853</text>
                 </g>
-                <!-- 8: Alaska 1867 -->
+
+                <!-- LAYER 8: Alaska (1867) -->
+                <!-- Inset no canto inferior esquerdo -->
                 <g id="exp-layer-8" style="display:none">
-                  <rect x="30" y="295" width="120" height="38" rx="4" fill="rgba(41,128,185,.6)" stroke="#91c7ff" stroke-width="1"/>
-                  <text x="90" y="311" text-anchor="middle" font-size="7.5" fill="white" font-family="sans-serif" font-weight="bold">ALASCA</text>
-                  <text x="90" y="322" text-anchor="middle" font-size="6.5" fill="white" font-family="sans-serif">1867 (Rússia)</text>
+                  <!-- Moldura do inset -->
+                  <rect x="42" y="318" width="170" height="88" rx="5" fill="rgba(5,15,30,.7)" stroke="rgba(145,199,255,.3)" stroke-width=".8"/>
+                  <text x="127" y="332" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.4)" font-family="sans-serif">ALASCA (inset)</text>
+                  <!-- Forma aproximada do Alaska -->
+                  <path d="M52,370 L60,355 L75,345 L92,340 L110,338 L128,340 L145,345 L158,354 L165,365 L162,376 L150,382 L132,386 L112,386 L92,382 L74,376 Z"
+                        fill="rgba(41,128,185,.62)" stroke="#91c7ff" stroke-width="1.2"/>
+                  <!-- Ilhas Aleutas simplificadas -->
+                  <ellipse cx="68" cy="390" rx="8" ry="4" fill="rgba(41,128,185,.5)" stroke="#91c7ff" stroke-width=".8"/>
+                  <ellipse cx="54" cy="393" rx="5" ry="3" fill="rgba(41,128,185,.5)" stroke="#91c7ff" stroke-width=".8"/>
+                  <text x="108" y="366" text-anchor="middle" font-size="9" fill="white" font-family="sans-serif" font-weight="bold">ALASCA</text>
+                  <text x="108" y="378" text-anchor="middle" font-size="7.5" fill="rgba(190,225,255,.8)" font-family="sans-serif">1867 (Rússia)</text>
                 </g>
-                <!-- 9: Havaí + Porto Rico 1898 -->
+
+                <!-- LAYER 9: Havaí + Porto Rico / Guam (1898) -->
                 <g id="exp-layer-9" style="display:none">
-                  <rect x="165" y="295" width="90" height="38" rx="4" fill="rgba(155,89,182,.6)" stroke="#c39bd3" stroke-width="1"/>
-                  <text x="210" y="310" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="bold">HAVAÍ</text>
-                  <text x="210" y="321" text-anchor="middle" font-size="6.5" fill="white" font-family="sans-serif">1898</text>
-                  <rect x="270" y="295" width="110" height="38" rx="4" fill="rgba(231,76,60,.5)" stroke="#e74c3c" stroke-width="1"/>
-                  <text x="325" y="310" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="bold">PORTO RICO</text>
-                  <text x="325" y="321" text-anchor="middle" font-size="6.5" fill="white" font-family="sans-serif">+ GUAM 1898</text>
+                  <!-- Havaí inset -->
+                  <rect x="222" y="318" width="140" height="88" rx="5" fill="rgba(5,15,30,.7)" stroke="rgba(195,155,211,.3)" stroke-width=".8"/>
+                  <text x="292" y="332" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.4)" font-family="sans-serif">HAVAÍ (inset)</text>
+                  <ellipse cx="255" cy="372" rx="12" ry="7" fill="rgba(155,89,182,.65)" stroke="#c39bd3" stroke-width="1"/>
+                  <ellipse cx="278" cy="368" rx="9" ry="5" fill="rgba(155,89,182,.65)" stroke="#c39bd3" stroke-width="1"/>
+                  <ellipse cx="297" cy="365" rx="7" ry="4" fill="rgba(155,89,182,.65)" stroke="#c39bd3" stroke-width="1"/>
+                  <ellipse cx="313" cy="363" rx="5" ry="3" fill="rgba(155,89,182,.65)" stroke="#c39bd3" stroke-width="1"/>
+                  <text x="292" y="390" text-anchor="middle" font-size="8.5" fill="white" font-family="sans-serif" font-weight="bold">HAVAÍ 1898</text>
+
+                  <!-- Porto Rico inset -->
+                  <rect x="372" y="318" width="218" height="88" rx="5" fill="rgba(5,15,30,.7)" stroke="rgba(231,76,60,.3)" stroke-width=".8"/>
+                  <text x="481" y="332" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.4)" font-family="sans-serif">CARIBE / PACÍFICO (inset)</text>
+                  <!-- Porto Rico -->
+                  <ellipse cx="430" cy="362" rx="28" ry="12" fill="rgba(231,76,60,.58)" stroke="#e74c3c" stroke-width="1"/>
+                  <text x="430" y="366" text-anchor="middle" font-size="7.5" fill="white" font-family="sans-serif" font-weight="bold">PORTO RICO</text>
+                  <!-- Guam -->
+                  <ellipse cx="510" cy="358" rx="14" ry="7" fill="rgba(231,76,60,.58)" stroke="#e74c3c" stroke-width="1"/>
+                  <text x="510" y="362" text-anchor="middle" font-size="6.5" fill="white" font-family="sans-serif">GUAM</text>
+                  <text x="481" y="395" text-anchor="middle" font-size="7.5" fill="rgba(255,190,180,.8)" font-family="sans-serif">Porto Rico + Guam 1898</text>
                 </g>
-                <!-- Legenda Territórios Ultramarinos -->
-                <text x="260" y="338" text-anchor="middle" font-size="6.5" fill="rgba(255,255,255,.3)" font-family="sans-serif">▲ Alaska, Havaí e territórios ultramarinos em destaque separado</text>
+
+                <!-- Escala / nota -->
+                <text x="320" y="413" text-anchor="middle" font-size="6.5" fill="rgba(255,255,255,.22)" font-family="sans-serif">Mapa esquemático — contornos aproximados para fins didáticos</text>
               </svg>
             </div>
 
@@ -1071,6 +1138,9 @@ function irPara(n) {
   if(S.tela && S.tela !== n) verificarLeituraAdequada(S.tela);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(`screen-${n}`)?.classList.add('active');
+  // Rola ao topo ao trocar de tela
+  var c=document.getElementById('conteudo'); if(c) c.scrollTop=0;
+  window.scrollTo(0,0);
   S.tela=n;
   if(!S.unlocked.includes(n)) S.unlocked.push(n);
   atualizarMenu(); salvarLocal();
