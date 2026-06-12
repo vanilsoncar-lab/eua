@@ -9,10 +9,10 @@
 /* CSS OTIMIZADO - Mesmo visual, código reduzido */
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--gold:#c9a84c;--gold2:#e8cc7a;--green:#5d9c3a;--green2:#3d7a1f;--dark:#0d0f0d;--xp:#80ff00;--blue:#2980b9;--red:#c0392b;--navy:#1a2a4a;--crimson:#8b1a1a;--success:#2ecc71;--sidebar:#1e3a5a;--accent:#2980b9;}
-body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-height:100vh;}
+body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}html,body{height:100%;}#app-page{height:100%;display:flex;flex-direction:column;}
 
 /* LOGIN */
-#login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(93,156,58,.05) 32px),repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(93,156,58,.05) 32px),linear-gradient(160deg,#0a1f0a,#0d0f0d);}
+#login-page{min-height:100%;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(93,156,58,.05) 32px),repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(93,156,58,.05) 32px),linear-gradient(160deg,#0a1f0a,#0d0f0d);}
 #login-page.oculto{display:none;}
 .login-box{background:rgba(0,0,0,.9);border:3px solid #c9a84c;max-width:390px;width:100%;padding:1.8rem 1.5rem 1.5rem;box-shadow:6px 6px 0 rgba(0,0,0,.5);position:relative;}
 .login-logo{display:block;width:80px;height:auto;object-fit:contain;margin:0 auto 1rem;background:transparent;border-radius:8px;}
@@ -32,11 +32,11 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
 .login-msg.ok{color:#80ff00;}.login-msg.err{color:#ff6b6b;}
 
 /* APP */
-#app-page{display:none;}
-#app-page.visivel{display:block;}
+#app-page{display:none;height:100%;flex-direction:column;}
+#app-page.visivel{display:flex;}
 
 /* HUD */
-#hud{position:sticky;top:0;background:rgba(0,0,0,.95);border-bottom:3px solid #c9a84c;padding:.6rem .75rem;display:flex;align-items:center;gap:.65rem;z-index:200;}
+#hud{position:relative;flex-shrink:0;background:rgba(0,0,0,.95);border-bottom:3px solid #c9a84c;padding:.6rem .75rem;display:flex;align-items:center;gap:.65rem;z-index:200;}
 .hud-av{font-size:1.8rem;width:45px;height:45px;display:flex;align-items:center;justify-content:center;border:2px solid #c9a84c;border-radius:2px;background:#111;}
 .hud-info{flex:1;}
 .hud-nome{font-family:"Press Start 2P",monospace;font-size:.65rem;color:#ffffff;margin-bottom:2px;}
@@ -48,8 +48,8 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
 .btn-hud{background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#c9a84c;padding:.35rem .6rem;cursor:pointer;font-family:"Press Start 2P",monospace;font-size:.45rem;}
 
 /* SIDEBAR */
-#layout{display:flex;min-height:calc(100vh - 62px);}
-#sidebar{width:250px;min-width:250px;background:rgba(0,0,0,.92);border-right:3px solid #222;display:flex;flex-direction:column;padding:.75rem .6rem;overflow-y:auto;max-height:calc(100vh - 62px);}
+#layout{display:flex;flex:1;min-height:0;overflow:hidden;}
+#sidebar{width:250px;min-width:250px;background:rgba(0,0,0,.92);border-right:3px solid #222;display:flex;flex-direction:column;padding:.75rem .6rem;overflow-y:auto;}
 .side-logo{display:flex;justify-content:center;margin-bottom:.5rem;}
 .side-logo-img{width:80px;height:auto;border-radius:8px;border:2px solid var(--gold);padding:3px;background:#0a0a0a;}
 .side-titulo{font-family:"Press Start 2P",monospace;font-size:.58rem;color:#c9a84c;text-align:center;padding:.5rem;background:rgba(255,255,255,.06);border:1px solid rgba(201,168,76,.25);margin-bottom:.5rem;}
@@ -71,11 +71,11 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
 #nav-xp-fill{height:100%;background:#80ff00;width:0%;}
 
 /* CONTEÚDO PRINCIPAL */
-#conteudo{flex:1;overflow-y:auto;background:#16213e;min-width:0;scroll-behavior:auto;}
+#conteudo{flex:1;overflow-y:auto;overflow-x:hidden;background:#16213e;min-width:0;scroll-behavior:auto;overflow-anchor:none;height:100%;}
 .screen{display:none;}
 .screen.active{display:block;animation:fadeIn .35s ease;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.screen-inner{max-width:1000px;margin:0 auto;padding:1.4rem 1.1rem 5rem;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.screen-inner{max-width:1000px;margin:0 auto;padding:1.4rem 1.1rem 5rem;}.screen-inner>h2:first-child{margin-top:0;padding-top:0;}
 .content-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:1.2rem;margin-bottom:1rem;}
 .content-card h3{font-family:'Montserrat',sans-serif;font-size:.9rem;color:#91c7ff;margin-bottom:8px;}
 .content-card p{font-size:.92rem;line-height:1.8;color:#d1e3f8;}
@@ -481,7 +481,7 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
   <div class="fq-feedback" id="fq-feedback"></div>
 </div>
 
-<div class="enigma-box" id="enigma-2"><div class="enigma-header"><span class="enigma-icon">🔐</span><span class="enigma-title">ENIGMA Nº 2</span></div><div style="background:rgba(201,168,76,.08);border-left:3px solid #c9a84c;border-radius:6px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.82rem;color:#e8cc7a;line-height:1.7;"><strong>💡 Pista:</strong> Em 1773, colonos revoltados com o monopólio inglês do chá invadiram navios e jogaram 342 caixas ao mar. Esse ato ocorreu em um porto famoso da costa leste da América do Norte, uma cidade que também foi palco do Massacre de 1770, onde soldados britânicos abriram fogo contra colonos desarmados. Releia o texto acima e localize o nome desse porto.</div><p class="enigma-question">Em qual cidade ocorreu a Festa do Chá de 1773?</p><div class="enigma-options"><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">A) Nova York</div><div class="enigma-opt" onclick="respEnigma(2,this,true)" data-enig="2" data-correct="true">B) Boston</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">C) Filadélfia</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">D) Charleston</div></div><div class="enigma-feedback"></div></div><div class="enigma-header"><span class="enigma-icon">🔐</span><span class="enigma-title">ENIGMA Nº 2</span></div><div style="background:rgba(201,168,76,.08);border-left:3px solid #c9a84c;border-radius:6px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.82rem;color:#e8cc7a;line-height:1.7;"><strong>💡 Pista:</strong> Em 1773, colonos revoltados com o monopólio inglês do chá invadiram navios e jogaram 342 caixas ao mar. Esse ato ocorreu em um porto famoso da costa leste da América do Norte, uma cidade que também foi palco do Massacre de 1770, onde soldados britânicos abriram fogo contra colonos desarmados. Releia o texto acima e localize o nome desse porto.</div><p class="enigma-question">Em qual cidade ocorreu a Festa do Chá de 1773?</p><div class="enigma-options"><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">A) Nova York</div><div class="enigma-opt" onclick="respEnigma(2,this,true)" data-enig="2" data-correct="true">B) Boston</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">C) Filadélfia</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">D) Charleston</div></div><div class="enigma-feedback"></div></div><div class="nav-btn-wrapper"><button class="btn-continue locked" id="btn-next-2" disabled>Continuar</button><span class="lock-hint">Explore todos os eventos</span></div></div></section>
+<div class="enigma-box" id="enigma-2"><div class="enigma-header"><span class="enigma-icon">🔐</span><span class="enigma-title">ENIGMA Nº 2</span></div><div style="background:rgba(201,168,76,.08);border-left:3px solid #c9a84c;border-radius:6px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.82rem;color:#e8cc7a;line-height:1.7;"><strong>💡 Pista:</strong> Em 1773, colonos revoltados com o monopólio inglês do chá invadiram navios e jogaram 342 caixas ao mar. Esse ato ocorreu em um porto famoso da costa leste da América do Norte, uma cidade que também foi palco do Massacre de 1770, onde soldados britânicos abriram fogo contra colonos desarmados. Releia o texto acima e localize o nome desse porto.</div><p class="enigma-question">Em qual cidade ocorreu a Festa do Chá de 1773?</p><div class="enigma-options"><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">A) Nova York</div><div class="enigma-opt" onclick="respEnigma(2,this,true)" data-enig="2" data-correct="true">B) Boston</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">C) Filadélfia</div><div class="enigma-opt" onclick="respEnigma(2,this,false)" data-enig="2" data-correct="false">D) Charleston</div></div><div class="enigma-feedback"></div></div><div class="nav-btn-wrapper"><button class="btn-continue locked" id="btn-next-2" disabled>Continuar</button><span class="lock-hint">Explore todos os eventos</span></div></div></section>
       
       <section id="screen-3" class="screen"><div class="screen-inner"><h2>🌍 Impactos no Mundo</h2><div class="impact-grid"><div class="impact-card modern"><h4>Moderno</h4><ul><li>Primeira colônia independente</li><li>Primeira república nas Américas</li></ul></div><div class="impact-card contemporary"><h4>Contemporâneo</h4><ul><li>Modelo constitucional global</li><li>Potência mundial</li></ul></div></div><div style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);padding:.6rem 1rem;border-radius:8px 8px 0 0;margin-top:1rem;"><p style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:.78rem;color:#0d0f0d;text-transform:uppercase;letter-spacing:.04em;">🗺️ AS 13 COLÔNIAS NO MAPA</p></div>
 <div class="content-card" style="border-radius:0 0 12px 12px;border-top:none;margin-bottom:1.2rem;padding:1rem .8rem;">
@@ -1134,15 +1134,13 @@ function atualizarHUD() {
 }
 
 function irPara(n) {
-  // verifica leitura da tela atual antes de trocar
   if(S.tela && S.tela !== n) verificarLeituraAdequada(S.tela);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(`screen-${n}`)?.classList.add('active');
-  // Rola ao topo ao trocar de tela (duplo reset para iOS Safari)
-  var c=document.getElementById('conteudo'); if(c) c.scrollTop=0;
-  window.scrollTo(0,0);
-  setTimeout(function(){ var c2=document.getElementById('conteudo'); if(c2) c2.scrollTop=0; window.scrollTo(0,0); }, 50);
+  var _ns=document.getElementById('screen-'+n); if(_ns) _ns.classList.add('active');
   S.tela=n;
+  function _top(){ var c=document.getElementById('conteudo'); if(c){c.scrollTop=0;c.scrollLeft=0;} window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; }
+  _top();
+  requestAnimationFrame(function(){ _top(); requestAnimationFrame(_top); });
   if(!S.unlocked.includes(n)) S.unlocked.push(n);
   atualizarMenu(); salvarLocal();
   iniciarTemporizadorLeitura(n);
@@ -1315,12 +1313,12 @@ function fazerCadastro() {
   if(senha.length<4){document.getElementById('msg-cadastro').textContent='Senha deve ter pelo menos 4 caracteres';return;}
   if(localStorage.getItem(CHAVE_AUTH+email.toLowerCase())){document.getElementById('msg-cadastro').textContent='E-mail já cadastrado';return;}
   try{localStorage.removeItem('oda_sessao_ativa');}catch(e){}
-  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[],flagQuizOk:false,expTlAbertos:[],expQuizOk:false};
+  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[],flagQuizOk:false,expTlAbertos:[],expQuizOk:false,plagioDetectado:false,bloqueioXpProximaTarefa:false};
   salvarLocal();
   iniciarApp();
   log('Cadastro realizado');
 }
-function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} if(!S.monitor) S.monitor={inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0}; if(!S.mapaClicado) S.mapaClicado=[]; if(!S.leituraOk) S.leituraOk={}; if(!S.leituraRapida) S.leituraRapida=[]; if(!S.expTlAbertos) S.expTlAbertos=[]; let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); restaurarFlagQuiz(); restaurarExpTl(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) restaurarPesquisa(); salvarLocal(); iniciarMonitoramento(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
+function iniciarApp() { try{ localStorage.setItem('oda_sessao_ativa', S.email.toLowerCase()); }catch(e){} if(!S.monitor) S.monitor={inicioSessao:null,saidasAba:0,tempoForaSeg:0,saidasFullscreen:0,penalXpTotal:0}; if(!S.mapaClicado) S.mapaClicado=[]; if(!S.leituraOk) S.leituraOk={}; if(!S.leituraRapida) S.leituraRapida=[]; if(!S.expTlAbertos) S.expTlAbertos=[]; let _primeiroAcesso=(!S.hist||S.hist.length===0); document.getElementById('login-page').classList.add('oculto'); document.getElementById('app-page').classList.add('visivel'); renderPhilosophers(); renderTimeline(); renderChecklist(); restaurarEnigmas(); restaurarFlagQuiz(); restaurarExpTl(); restaurarExpQuiz(); if(S.dmFinalizado){ let btn=document.querySelector('.btn-finalizar-dm'); if(btn){btn.disabled=true;btn.style.opacity='0.4';} let r=document.getElementById('resultado-dm'); if(r) r.style.display='block'; } atualizarHUD(); atualizarMenu(); let last=Math.max(...S.unlocked); irPara(last||1); if(S.notaOk) restaurarPesquisa(); salvarLocal(); iniciarMonitoramento(); if(_primeiroAcesso) setTimeout(abrirBoasvindas, 400); }
 function sair() { try{ localStorage.removeItem('oda_sessao_ativa'); }catch(e){} document.getElementById('app-page').classList.remove('visivel'); document.getElementById('login-page').classList.remove('oculto'); irPagina('pg-login'); }
 function toggleNav() { document.getElementById('sidebar').classList.toggle('aberto'); document.getElementById('overlay-nav').classList.toggle('aberto'); }
 function fecharNav() { document.getElementById('sidebar').classList.remove('aberto'); document.getElementById('overlay-nav').classList.remove('aberto'); }
@@ -1429,6 +1427,127 @@ function _verificarPesquisaLocal(resposta) {
   return { status: status, nota: nota, feedback: feedback, impactos_identificados: impactosEncontrados };
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// SISTEMA DE DETECÇÃO DE PLÁGIO — Pesquisa "3 Impactos da Independência"
+// ══════════════════════════════════════════════════════════════════════
+
+// Normaliza string: minúsculas, sem acentos, sem pontuação extra
+function _normText(t) {
+  return (t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+// Calcula similaridade de bigramas entre dois textos (Dice coefficient)
+function _similaridadeDice(a, b) {
+  var ta = _normText(a), tb = _normText(b);
+  if(!ta.length || !tb.length) return 0;
+  function bigramas(s){ var bg=new Set(); for(var i=0;i<s.length-1;i++) bg.add(s.slice(i,i+2)); return bg; }
+  var ba = bigramas(ta), bb = bigramas(tb);
+  var intersect = 0;
+  ba.forEach(function(g){ if(bb.has(g)) intersect++; });
+  return (2*intersect)/(ba.size+bb.size);
+}
+
+// Verifica se há substring longa demais compartilhada (sequência de palavras)
+function _maiorSubsequenciaComum(a, b, minPalavras) {
+  var wa = _normText(a).split(' ').filter(Boolean);
+  var wb = _normText(b).split(' ').filter(Boolean);
+  var melhor = 0;
+  for(var i=0;i<wa.length;i++){
+    for(var j=0;j<wb.length;j++){
+      var k=0;
+      while(i+k<wa.length && j+k<wb.length && wa[i+k]===wb[j+k]) k++;
+      if(k>melhor) melhor=k;
+    }
+  }
+  return melhor;
+}
+
+// Referência Google — resposta padrão exibida para a pergunta
+var _GABARITO_GOOGLE = [
+  'A independência dos Estados Unidos (1776) mudou o cenário mundial ao romper o pacto colonial e inspirar nações ao redor do globo.',
+  'Foi a primeira vez que ideais como a separação dos poderes, a defesa das liberdades individuais e a igualdade jurídica foram colocados em prática na formação de um Estado.',
+  'O sucesso da independência serviu de forte inspiração política para a queda do absolutismo na Revolução Francesa e para os movimentos de independência em toda a América Latina.',
+  'O país estabeleceu um formato de governo republicano totalmente novo, baseado no federalismo, que deu grande autonomia regional às antigas colônias, servindo como referência estrutural para repúblicas modernas.',
+  'Aplicação Prática do Iluminismo',
+  'Incentivo a Outras Revoluções',
+  'Modelo de Estado Republicano e Federalista',
+  'romper o pacto colonial e inspirar nações ao redor do globo',
+  'referência estrutural para repúblicas modernas',
+  'formato de governo republicano totalmente novo baseado no federalismo'
+].join(' ');
+
+// Fragmentos literais que identificam cópia direta do Google
+var _FRAGMENTOS_LITERAIS = [
+  // ── resposta Google nova ──
+  'romper o pacto colonial',
+  'inspirar nacoes ao redor do globo',
+  'aplicacao pratica do iluminismo',
+  'incentivo a outras revolucoes',
+  'modelo de estado republicano e federalista',
+  'igualdade juridica foram colocados em pratica na formacao de um estado',
+  'forte inspiracao politica para a queda do absolutismo',
+  'grande autonomia regional as antigas colonias',
+  'referencia estrutural para republicas modernas',
+  'formato de governo republicano totalmente novo baseado no federalismo',
+  // ── material do professor (busca anterior) ──
+  'iluminismo | historia',
+  'historia - 8o ano',
+  'prof. vanilson cardoso',
+  'prof vanilson cardoso',
+  'utilize o livro didatico',
+  'paginas 42 a 51',
+  'assista aos videos disponiveis',
+  'qr codes abaixo',
+  '8o ano | 2026'
+];
+
+// Retorna: 'copia_direta' | 'possivel_copia' | 'ok'
+function _classificarPlagio(resposta) {
+  var rNorm = _normText(resposta);
+
+  // 1. Fragmentos literais ──────────────────────────────────────────────
+  var achouLiteral = _FRAGMENTOS_LITERAIS.some(function(f){
+    return rNorm.indexOf(_normText(f)) !== -1;
+  });
+  if(achouLiteral) return 'copia_direta';
+
+  // 2. Similaridade Dice com gabarito Google (>= 0.42 = cópia direta) ─
+  var dice = _similaridadeDice(resposta, _GABARITO_GOOGLE);
+  if(dice >= 0.42) return 'copia_direta';
+  if(dice >= 0.26) return 'possivel_copia';
+
+  // 3. Sequência de palavras consecutivas (>= 9 palavras = cópia direta)
+  var seqMax = _maiorSubsequenciaComum(resposta, _GABARITO_GOOGLE, 9);
+  if(seqMax >= 9) return 'copia_direta';
+  if(seqMax >= 6) return 'possivel_copia';
+
+  return 'ok';
+}
+
+// Toca alarme sonoro por N segundos via Web Audio API
+function _tocarAlarmePlagio(duracaoSeg) {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var durTotal = duracaoSeg || 4;
+    var inicio = ctx.currentTime;
+    // Sequência de beeps agressivos
+    var freqs = [880, 660, 880, 660, 1100, 660, 880, 440];
+    var intervalo = durTotal / freqs.length;
+    freqs.forEach(function(freq, i){
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0, inicio + i*intervalo);
+      gain.gain.linearRampToValueAtTime(0.55, inicio + i*intervalo + 0.02);
+      gain.gain.linearRampToValueAtTime(0.0, inicio + i*intervalo + intervalo - 0.05);
+      osc.start(inicio + i*intervalo);
+      osc.stop(inicio + i*intervalo + intervalo);
+    });
+  } catch(e){ /* sem suporte a Web Audio */ }
+}
+
 function enviarPesquisa() {
   var resposta = (document.getElementById('pesq-textarea').value || '').trim();
   if (resposta.length < 30) {
@@ -1436,53 +1555,73 @@ function enviarPesquisa() {
     return;
   }
 
-  // ── DETECÇÃO DE CÓPIA / COLA DO GOOGLE ──────────────────────────────
-  // Fragmentos identificadores do resultado padrão que o Google exibe
-  var fragmentosCopia = [
-    'iluminismo | história',
-    'história – 8º ano',
-    'história - 8º ano',
-    'prof. vanilson cardoso',
-    'prof vanilson cardoso',
-    'utilize o livro didático',
-    'páginas 42 a 51',
-    'assista aos vídeos disponíveis',
-    'qr codes abaixo',
-    '8º ano | 2026',
-    '8o ano | 2026',
-    'vanilson cardoso'
-  ];
-  var respostaLower = resposta.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  var copiouGoogle = fragmentosCopia.some(function(f){
-    return respostaLower.indexOf(f.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')) !== -1;
-  });
+  // ── VERIFICAÇÃO DE PLÁGIO ────────────────────────────────────────────
+  var veredicto = _classificarPlagio(resposta);
 
-  if (copiouGoogle) {
-    // Penalidade: perder 50% do XP acumulado
+  if (veredicto === 'copia_direta') {
+    // Penalidade: -50% XP
     var xpAntes = S.xp;
     var penalidade = Math.floor(S.xp * 0.5);
     S.xp = Math.max(0, S.xp - penalidade);
+    S.plagioDetectado = true;
     atualizarHUD();
     salvarLocal();
 
+    // Alarme sonoro 4 segundos
+    _tocarAlarmePlagio(4);
+
+    // Overlay de alerta
     var fbEl = document.getElementById('pesq-feedback');
     fbEl.style.display = 'block';
     fbEl.className = 'pesq-feedback erro';
     fbEl.innerHTML =
-      '<strong>🚫 TRAPAÇA DETECTADA!</strong><br>' +
-      'Sua resposta contém texto copiado do Google (resultado da busca pelo material do professor).<br>' +
-      'Como penalidade, você perdeu <strong>' + penalidade + ' XP</strong> (' +
-      xpAntes + ' → ' + S.xp + ' XP).<br>' +
-      '<span style="font-size:.78rem;color:#ffb3b3;">Escreva com suas próprias palavras o que você aprendeu sobre os impactos da Independência dos EUA.</span>';
+      '<div style="text-align:center;padding:.5rem 0;">' +
+      '<div style="font-family:'Press Start 2P',monospace;font-size:.85rem;color:#ff4444;letter-spacing:.05em;line-height:1.8;margin-bottom:.8rem;">' +
+      '🚨 VOCÊ TRAPACEOU<br>E PERDERÁ 50% DAS<br>XP ACUMULADAS ATÉ AQUI!' +
+      '</div>' +
+      '<div style="font-size:.8rem;color:#ffb3b3;margin-bottom:.6rem;">' +
+      'Cópia direta detectada. Sua resposta reproduz conteúdo encontrado na internet.<br>' +
+      '<strong>Penalidade aplicada: −' + penalidade + ' XP</strong> (' + xpAntes + ' → ' + S.xp + ' XP)' +
+      '</div>' +
+      '<div style="font-size:.75rem;color:#ff9090;">Limpe o campo e reescreva com suas próprias palavras.</div>' +
+      '</div>';
 
     var btn = document.getElementById('pesq-send-btn');
     if(btn){ btn.disabled = false; btn.textContent = '✔ ENVIAR RESPOSTA'; }
     var ta = document.getElementById('pesq-textarea');
     if(ta){ ta.disabled = false; ta.value = ''; ta.focus(); }
-    log('TRAPAÇA: resposta copiada do Google. Penalidade: -' + penalidade + ' XP');
+    log('PLAGIO DIRETO: -' + penalidade + ' XP. Novo total: ' + S.xp);
     return;
   }
-  // ── FIM DETECÇÃO DE CÓPIA ───────────────────────────────────────────
+
+  if (veredicto === 'possivel_copia') {
+    // Sem penalidade de XP, mas bloqueia XP da próxima tarefa
+    S.bloqueioXpProximaTarefa = true;
+    salvarLocal();
+
+    var fbEl2 = document.getElementById('pesq-feedback');
+    fbEl2.style.display = 'block';
+    fbEl2.className = 'pesq-feedback parcial';
+    fbEl2.innerHTML =
+      '<div style="text-align:center;padding:.4rem 0;">' +
+      '<div style="font-family:'Press Start 2P',monospace;font-size:.72rem;color:#e8cc7a;letter-spacing:.04em;line-height:1.9;margin-bottom:.7rem;">' +
+      '⚠️ VOCÊ SERÁ INVESTIGADO<br>POR SUSPEITA DE PLÁGIO.' +
+      '</div>' +
+      '<div style="font-size:.8rem;color:#ffe082;margin-bottom:.5rem;">' +
+      'Sua resposta apresenta estrutura e vocabulário muito semelhantes a textos da internet.<br>' +
+      '<strong>Como consequência, ficará impedido de acumular XP na próxima tarefa.</strong>' +
+      '</div>' +
+      '<div style="font-size:.75rem;color:#ffd54f;">Reescreva com suas próprias palavras para remover a suspeita.</div>' +
+      '</div>';
+
+    var btn2 = document.getElementById('pesq-send-btn');
+    if(btn2){ btn2.disabled = false; btn2.textContent = '✔ ENVIAR RESPOSTA'; }
+    var ta2 = document.getElementById('pesq-textarea');
+    if(ta2){ ta2.disabled = false; ta2.value = ''; ta2.focus(); }
+    log('PLAGIO SUSPEITO: XP próxima tarefa bloqueada.');
+    return;
+  }
+  // ── FIM VERIFICAÇÃO DE PLÁGIO ────────────────────────────────────────
 
   clearInterval(_pesqTimer);
   var tempoGasto = Math.floor((Date.now() - _pesqInicioTs) / 1000);
@@ -1491,7 +1630,6 @@ function enviarPesquisa() {
   btn.textContent = '⏳ Verificando...';
   document.getElementById('pesq-textarea').disabled = true;
 
-  // Pequeno delay para dar feedback visual de "verificando"
   setTimeout(function() {
     var result = _verificarPesquisaLocal(resposta);
     _aplicarResultadoPesquisa(result, tempoGasto, resposta);
@@ -1502,13 +1640,20 @@ function _aplicarResultadoPesquisa(result, tempoGasto, resposta) {
   var status = result.status || 'insuficiente';
   var xpGanho = 0;
 
+  // Se há bloqueio de XP por suspeita de plágio anterior, zera ganho
+  var bloqueado = S.bloqueioXpProximaTarefa || false;
+
   if (status === 'completa') {
-    // Bônus de velocidade: escala de 100xp (≤90s) a 70xp (≥420s)
-    var fatorTempo = Math.max(0, Math.min(1, (600 - tempoGasto) / 510));
-    xpGanho = Math.round(70 + fatorTempo * 30);
+    if(bloqueado) {
+      xpGanho = 0;
+    } else {
+      // Bônus de velocidade: escala de 100xp (≤90s) a 70xp (≥420s)
+      var fatorTempo = Math.max(0, Math.min(1, (600 - tempoGasto) / 510));
+      xpGanho = Math.round(70 + fatorTempo * 30);
+    }
   } else if (status === 'parcial') {
     // Resposta incompleta → até 30 XP, sem bônus de tempo
-    xpGanho = Math.round((result.nota / 100) * 30);
+    xpGanho = bloqueado ? 0 : Math.round((result.nota / 100) * 30);
   } else {
     xpGanho = 0;
   }
@@ -1525,8 +1670,9 @@ function _aplicarResultadoPesquisa(result, tempoGasto, resposta) {
       result.impactos_identificados.map(function(imp){ return '<li>' + imp + '</li>'; }).join('') +
       '</ul>';
   }
+  var bloqueioAviso = bloqueado ? '<br><span style="color:#e8cc7a;font-size:.76rem;">⚠️ XP bloqueada por suspeita de plágio anterior. Sua resposta foi registrada sem pontuação.</span>' : '';
   fbEl.innerHTML = '<strong>' + (status === 'completa' ? '✅ Resposta completa!' : status === 'parcial' ? '⚠️ Resposta parcial' : '❌ Resposta insuficiente') + '</strong><br>' +
-    result.feedback + impactosHtml;
+    result.feedback + impactosHtml + bloqueioAviso;
 
   if (xpGanho > 0) {
     S.xp += xpGanho;
@@ -1574,7 +1720,7 @@ function restaurarPesquisa() {
   desbloquearBtn('btn-next-3', 'hint-3', 'Continuar');
 }
 
-function executarReinicio() { salvarHistoricoPercurso(); for(let k in S) if(!['nome','turma','email','senha','ano'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; S.pesquisaConcluida=false; S.pesquisaXp=0; S.pesquisaResposta=''; S.mapaClicado=[]; S.leituraOk={}; S.leituraRapida=[]; fecharModal('modal-reinicio'); location.reload(); }
+function executarReinicio() { salvarHistoricoPercurso(); for(let k in S) if(!['nome','turma','email','senha','ano'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; S.pesquisaConcluida=false; S.pesquisaXp=0; S.pesquisaResposta=''; S.mapaClicado=[]; S.leituraOk={}; S.leituraRapida=[]; S.plagioDetectado=false; S.bloqueioXpProximaTarefa=false; fecharModal('modal-reinicio'); location.reload(); }
 function verHistórico() { verHistoricoPercursos(); }
 function verPapeis() {
   let nivelAtual=getNivel(S.xp||0);
@@ -1911,6 +2057,16 @@ function restaurarExpTl() {
   });
 }
 
+function restaurarExpQuiz() {
+  if(!S.expQuizOk) return;
+  var opts = document.querySelectorAll('#exp-quiz-opts .fq-opt');
+  opts.forEach(function(o){ o.classList.add('fq-disabled'); });
+  var bOpt = document.querySelector('#exp-quiz-opts .fq-opt[onclick*="\'b\'"]');
+  if(bOpt) bOpt.classList.add('fq-correct-mark');
+  var fb = document.getElementById('exp-quiz-feedback');
+  if(fb) { fb.className='fq-feedback ok'; fb.innerHTML='✅ Já respondido! O modelo escravagista do Sul não gerava consumidores internos — essa foi uma das tensões que levou à Guerra Civil.'; fb.style.display='block'; }
+}
+
 function respExpQuiz(el, letra) {
   var opts = document.querySelectorAll('#exp-quiz-opts .fq-opt');
   opts.forEach(function(o){ o.classList.add('fq-disabled'); });
@@ -2127,7 +2283,7 @@ function novaJornada() {
     pesquisaConcluida: false, pesquisaXp: 0, pesquisaResposta: '',
     checkDone: [], unlocked: [1], tela: 1, hist: [], enigResp: [],
     dmFinalizado: false, mapaClicado: [], leituraOk: {}, leituraRapida: [],
-    flagQuizOk: false, expTlAbertos: [], expQuizOk: false,
+    flagQuizOk: false, expTlAbertos: [], expQuizOk: false, plagioDetectado: false, bloqueioXpProximaTarefa: false,
     monitor: { inicioSessao: null, saidasAba: 0, tempoForaSeg: 0, saidasFullscreen: 0, penalXpTotal: 0 }
   });
   _leituraTimers = {};
