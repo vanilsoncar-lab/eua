@@ -1411,22 +1411,54 @@ function _verificarPesquisaLocal(resposta) {
   var minChars = resposta.length;
 
   // Exige também tamanho mínimo razoável por impacto
-  var status, nota, feedback;
+  // Mapeia quais grupos NÃO foram cobertos, para feedback preciso
+  var todoGrupos = grupos.map(function(g){ return g.nome; });
+  var faltando = todoGrupos.filter(function(n){ return impactosEncontrados.indexOf(n) === -1; });
+
+  // Dicas específicas por grupo faltante
+  var dicasPorGrupo = {
+    'Inspiração para revoluções':        'Você mencionou como a independência inspirou outras revoluções (ex: Revolução Francesa)?',
+    'Modelo constitucional e democrático':'Você falou sobre a criação da Constituição, república ou separação dos poderes?',
+    'Expansão e potência mundial':        'Você citou a expansão territorial dos EUA ou como viraram uma potência mundial?',
+    'Ondas de independência nas Américas':'Você mencionou as independências na América Latina (ex: Brasil, países hispânicos)?',
+    'Liberalismo econômico':             'Você abordou o liberalismo econômico, livre comércio ou o capitalismo americano?',
+    'Direitos humanos e contradições':   'Você discutiu os direitos humanos ou as contradições da independência (escravidão, indígenas)?'
+  };
+
+  var status, nota, feedback, faltouHtml = '';
+
   if (qtd >= 3 && minChars >= 120) {
     status = 'completa';
     nota = 85;
     feedback = 'Excelente! Você identificou os três impactos corretamente. Continue assim, seu raciocínio histórico está ótimo!';
+
   } else if (qtd >= 2 || (qtd >= 1 && minChars >= 80)) {
     status = 'parcial';
     nota = 40;
-    feedback = 'Boa tentativa! Você acertou parte dos impactos, mas a resposta ficou incompleta. Revise seu material e tente detalhar melhor cada impacto com exemplos.';
+    // Monta lista de dicas para o que faltou
+    var dicas = faltando.slice(0,3).map(function(n){
+      return dicasPorGrupo[n] || ('Desenvolva mais sobre: ' + n);
+    });
+    faltouHtml = '<div style="margin-top:.6rem;padding:.6rem .8rem;background:rgba(255,200,50,.07);border-left:3px solid #e8cc7a;border-radius:6px;font-size:.8rem;line-height:1.7;">'
+      + '<strong style="color:#e8cc7a;">📋 O que faltou na sua resposta:</strong><ul style="margin:.4rem 0 0 1rem;">'
+      + dicas.map(function(d){ return '<li style="margin-bottom:.25rem;">' + d + '</li>'; }).join('')
+      + '</ul></div>';
+    feedback = 'Boa tentativa! Você cobriu ' + qtd + ' dos 3 impactos esperados. Veja abaixo o que ficou faltando:';
+
   } else {
     status = 'insuficiente';
     nota = 0;
-    feedback = 'Sua resposta não contemplou os impactos esperados. Releia o conteúdo sobre a Independência dos EUA e tente novamente na próxima oportunidade!';
+    var dicasInsuf = grupos.slice(0,3).map(function(g){ return dicasPorGrupo[g.nome]; });
+    faltouHtml = '<div style="margin-top:.6rem;padding:.6rem .8rem;background:rgba(255,80,80,.07);border-left:3px solid #e74c3c;border-radius:6px;font-size:.8rem;line-height:1.7;">'
+      + '<strong style="color:#ff9090;">📋 Pontos que precisam aparecer na resposta:</strong><ul style="margin:.4rem 0 0 1rem;">'
+      + dicasInsuf.map(function(d){ return '<li style="margin-bottom:.25rem;">' + d + '</li>'; }).join('')
+      + '</ul>'
+      + '<div style="margin-top:.5rem;color:#ffb3b3;font-size:.76rem;">💡 Dica: escreva sobre cada impacto em um parágrafo ou frase separada.</div>'
+      + '</div>';
+    feedback = 'Sua resposta não contemplou os impactos esperados. Releia o conteúdo e observe os pontos abaixo:';
   }
 
-  return { status: status, nota: nota, feedback: feedback, impactos_identificados: impactosEncontrados };
+  return { status: status, nota: nota, feedback: feedback, impactos_identificados: impactosEncontrados, faltouHtml: faltouHtml };
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1679,15 +1711,26 @@ function _aplicarResultadoPesquisa(result, tempoGasto, resposta) {
   fbEl.style.display = 'block';
   fbEl.className = 'pesq-feedback ' + (status === 'completa' ? 'ok' : status === 'parcial' ? 'parcial' : 'erro');
 
+  // Impactos encontrados (verde)
   var impactosHtml = '';
   if (result.impactos_identificados && result.impactos_identificados.length) {
-    impactosHtml = '<ul style="margin:.4rem 0 0 1rem;">' +
-      result.impactos_identificados.map(function(imp){ return '<li>' + imp + '</li>'; }).join('') +
-      '</ul>';
+    impactosHtml = '<div style="margin-top:.5rem;font-size:.8rem;">'
+      + '<strong style="color:#6effa0;">✅ Identificado na sua resposta:</strong>'
+      + '<ul style="margin:.3rem 0 0 1rem;">'
+      + result.impactos_identificados.map(function(imp){ return '<li>' + imp + '</li>'; }).join('')
+      + '</ul></div>';
   }
-  var bloqueioAviso = bloqueado ? '<br><span style="color:#e8cc7a;font-size:.76rem;">⚠️ XP bloqueada por suspeita de plágio anterior. Sua resposta foi registrada sem pontuação.</span>' : '';
-  fbEl.innerHTML = '<strong>' + (status === 'completa' ? '✅ Resposta completa!' : status === 'parcial' ? '⚠️ Resposta parcial' : '❌ Resposta insuficiente') + '</strong><br>' +
-    result.feedback + impactosHtml + bloqueioAviso;
+
+  // O que faltou (amarelo/vermelho — vem do _verificarPesquisaLocal)
+  var faltouHtml = result.faltouHtml || '';
+
+  var bloqueioAviso = bloqueado ? '<div style="margin-top:.5rem;padding:.4rem .7rem;background:rgba(255,200,0,.08);border-left:3px solid #e8cc7a;border-radius:5px;font-size:.76rem;color:#e8cc7a;">⚠️ XP bloqueada por suspeita de plágio anterior. Sua resposta foi registrada sem pontuação.</div>' : '';
+
+  fbEl.innerHTML = '<strong>' + (status === 'completa' ? '✅ Resposta completa!' : status === 'parcial' ? '⚠️ Resposta parcial' : '❌ Resposta insuficiente') + '</strong><br>'
+    + result.feedback
+    + impactosHtml
+    + faltouHtml
+    + bloqueioAviso;
 
   if (xpGanho > 0) {
     S.xp += xpGanho;
