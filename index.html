@@ -1438,18 +1438,27 @@ function _normText(t) {
   return (t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
 }
 
-// Calcula similaridade de bigramas entre dois textos (Dice coefficient)
+// Stopwords temáticas — palavras que qualquer resposta correta do tema usaria
+var _STOPWORDS_TEMA = new Set('a o e de da do dos das um uma para com em que os as independencia estados unidos eua america americana americanos iluminismo revolucao francesa america latina republica federalismo constituicao declaracao independencia impacto impactos tres principais foram foi teve tinha criou criaram mostrou mostram pais paises outros outro outra tambem alem disso isso rei governo poder poderes direitos liberdade liberdades'.split(' '));
+
+// Extrai palavras relevantes (remove stopwords temáticas e palavras curtas)
+function _palavrasRelevantes(t) {
+  return _normText(t).split(' ').filter(function(w){ return w.length > 3 && !_STOPWORDS_TEMA.has(w); });
+}
+
+// Dice de BIGRAMAS DE PALAVRAS relevantes — não confunde vocabulário temático com cópia
 function _similaridadeDice(a, b) {
-  var ta = _normText(a), tb = _normText(b);
-  if(!ta.length || !tb.length) return 0;
-  function bigramas(s){ var bg=new Set(); for(var i=0;i<s.length-1;i++) bg.add(s.slice(i,i+2)); return bg; }
-  var ba = bigramas(ta), bb = bigramas(tb);
+  var wa = _palavrasRelevantes(a), wb = _palavrasRelevantes(b);
+  if(wa.length < 2 || wb.length < 2) return 0;
+  function bigPal(arr){ var s=new Set(); for(var i=0;i<arr.length-1;i++) s.add(arr[i]+' '+arr[i+1]); return s; }
+  var ba = bigPal(wa), bb = bigPal(wb);
+  if(!ba.size || !bb.size) return 0;
   var intersect = 0;
   ba.forEach(function(g){ if(bb.has(g)) intersect++; });
   return (2*intersect)/(ba.size+bb.size);
 }
 
-// Verifica se há substring longa demais compartilhada (sequência de palavras)
+// Sequência de palavras consecutivas idênticas (detecta cópia literal de trechos longos)
 function _maiorSubsequenciaComum(a, b, minPalavras) {
   var wa = _normText(a).split(' ').filter(Boolean);
   var wb = _normText(b).split(' ').filter(Boolean);
@@ -1513,15 +1522,15 @@ function _classificarPlagio(resposta) {
   });
   if(achouLiteral) return 'copia_direta';
 
-  // 2. Similaridade Dice com gabarito Google (>= 0.62 = cópia direta)
+  // 2. Dice de bigramas de palavras relevantes (sem stopwords temáticas)
   var dice = _similaridadeDice(resposta, _GABARITO_GOOGLE);
-  if(dice >= 0.62) return 'copia_direta';
-  if(dice >= 0.45) return 'possivel_copia';
+  if(dice >= 0.55) return 'copia_direta';
+  if(dice >= 0.30) return 'possivel_copia';
 
-  // 3. Sequência de palavras consecutivas (>= 12 palavras = cópia direta)
-  var seqMax = _maiorSubsequenciaComum(resposta, _GABARITO_GOOGLE, 12);
-  if(seqMax >= 12) return 'copia_direta';
-  if(seqMax >= 9)  return 'possivel_copia';
+  // 3. Sequência de palavras consecutivas (>= 14 = cópia direta, >= 10 = suspeita)
+  var seqMax = _maiorSubsequenciaComum(resposta, _GABARITO_GOOGLE, 14);
+  if(seqMax >= 14) return 'copia_direta';
+  if(seqMax >= 10) return 'possivel_copia';
 
   return 'ok';
 }
