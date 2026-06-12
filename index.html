@@ -71,7 +71,7 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
 #nav-xp-fill{height:100%;background:#80ff00;width:0%;}
 
 /* CONTEÚDO PRINCIPAL */
-#conteudo{flex:1;overflow-y:auto;background:#16213e;min-width:0;}
+#conteudo{flex:1;overflow-y:auto;background:#16213e;min-width:0;scroll-behavior:auto;}
 .screen{display:none;}
 .screen.active{display:block;animation:fadeIn .35s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -432,7 +432,7 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;min-hei
     <text x="35" y="158" font-size="18" fill="white" font-family="serif">★</text><text x="75" y="158" font-size="18" fill="white" font-family="serif">★</text><text x="115" y="158" font-size="18" fill="white" font-family="serif">★</text><text x="155" y="158" font-size="18" fill="white" font-family="serif">★</text><text x="195" y="158" font-size="18" fill="white" font-family="serif">★</text>
     <text x="15" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="55" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="95" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="135" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="175" y="184" font-size="18" fill="white" font-family="serif">★</text><text x="215" y="184" font-size="18" fill="white" font-family="serif">★</text>
     <!-- labels decorativos -->
-    <text x="382" y="200" font-size="13" fill="rgba(255,255,255,.25)" text-anchor="middle" font-style="italic">13 listras · 50 estrelas</text>
+    <!-- label decorativo removido -->
   </svg>
   <div class="flag-caption">
     🇺🇸 A bandeira dos Estados Unidos simboliza a <strong>história, os valores e a união</strong> da nação. Suas <strong>13 listras</strong> representam as colônias originais; as <strong>50 estrelas</strong>, os estados atuais. As cores carregam valores morais: <strong style="color:#B22234;">vermelho</strong> = valor e perseverança · <strong>branco</strong> = pureza e inocência · <strong style="color:#91c7ff;">azul</strong> = vigilância, perseverança e justiça.
@@ -1138,9 +1138,10 @@ function irPara(n) {
   if(S.tela && S.tela !== n) verificarLeituraAdequada(S.tela);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(`screen-${n}`)?.classList.add('active');
-  // Rola ao topo ao trocar de tela
+  // Rola ao topo ao trocar de tela (duplo reset para iOS Safari)
   var c=document.getElementById('conteudo'); if(c) c.scrollTop=0;
   window.scrollTo(0,0);
+  setTimeout(function(){ var c2=document.getElementById('conteudo'); if(c2) c2.scrollTop=0; window.scrollTo(0,0); }, 50);
   S.tela=n;
   if(!S.unlocked.includes(n)) S.unlocked.push(n);
   atualizarMenu(); salvarLocal();
@@ -1434,6 +1435,55 @@ function enviarPesquisa() {
     alert('Escreva sua resposta antes de enviar!');
     return;
   }
+
+  // ── DETECÇÃO DE CÓPIA / COLA DO GOOGLE ──────────────────────────────
+  // Fragmentos identificadores do resultado padrão que o Google exibe
+  var fragmentosCopia = [
+    'iluminismo | história',
+    'história – 8º ano',
+    'história - 8º ano',
+    'prof. vanilson cardoso',
+    'prof vanilson cardoso',
+    'utilize o livro didático',
+    'páginas 42 a 51',
+    'assista aos vídeos disponíveis',
+    'qr codes abaixo',
+    '8º ano | 2026',
+    '8o ano | 2026',
+    'vanilson cardoso'
+  ];
+  var respostaLower = resposta.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  var copiouGoogle = fragmentosCopia.some(function(f){
+    return respostaLower.indexOf(f.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')) !== -1;
+  });
+
+  if (copiouGoogle) {
+    // Penalidade: perder 50% do XP acumulado
+    var xpAntes = S.xp;
+    var penalidade = Math.floor(S.xp * 0.5);
+    S.xp = Math.max(0, S.xp - penalidade);
+    atualizarHUD();
+    salvarLocal();
+
+    var fbEl = document.getElementById('pesq-feedback');
+    fbEl.style.display = 'block';
+    fbEl.className = 'pesq-feedback erro';
+    fbEl.innerHTML =
+      '<strong>🚫 TRAPAÇA DETECTADA!</strong><br>' +
+      'Sua resposta contém texto copiado do Google (resultado da busca pelo material do professor).<br>' +
+      'Como penalidade, você perdeu <strong>' + penalidade + ' XP</strong> (' +
+      xpAntes + ' → ' + S.xp + ' XP).<br>' +
+      '<span style="font-size:.78rem;color:#ffb3b3;">Escreva com suas próprias palavras o que você aprendeu sobre os impactos da Independência dos EUA.</span>';
+
+    var btn = document.getElementById('pesq-send-btn');
+    if(btn){ btn.disabled = false; btn.textContent = '✔ ENVIAR RESPOSTA'; }
+    var ta = document.getElementById('pesq-textarea');
+    if(ta){ ta.disabled = false; ta.value = ''; ta.focus(); }
+    log('TRAPAÇA: resposta copiada do Google. Penalidade: -' + penalidade + ' XP');
+    return;
+  }
+  // ── FIM DETECÇÃO DE CÓPIA ───────────────────────────────────────────
+
   clearInterval(_pesqTimer);
   var tempoGasto = Math.floor((Date.now() - _pesqInicioTs) / 1000);
   var btn = document.getElementById('pesq-send-btn');
@@ -1499,10 +1549,11 @@ function restaurarFlagQuiz() {
   if(!S.flagQuizOk) return;
   var opts = document.querySelectorAll('.fq-opt');
   opts.forEach(function(o){ o.classList.add('fq-disabled'); });
+  // C é a alternativa INCORRETA (enunciado pede a INCORRETA), então fica vermelha ao acertar
   var cOpt = document.querySelector('.fq-opt[onclick*="\'c\'"]');
-  if(cOpt) cOpt.classList.add('fq-correct-mark');
+  if(cOpt) cOpt.classList.add('fq-wrong');
   var fb = document.getElementById('fq-feedback');
-  if(fb) { fb.className='fq-feedback ok'; fb.innerHTML='✅ Já respondido corretamente!'; fb.style.display='block'; }
+  if(fb) { fb.className='fq-feedback ok'; fb.innerHTML='✅ Já respondido! A alternativa C era a INCORRETA (reconhecimento britânico foi em 1783, não em 1776).'; fb.style.display='block'; }
 }
 
 function restaurarPesquisa() {
