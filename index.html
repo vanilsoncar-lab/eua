@@ -1013,10 +1013,10 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}#app-p
           <div class="flag-quiz-title">🔎 QUESTÃO REFLEXIVA</div>
           <p class="flag-quiz-q">Com base no conteúdo estudado, qual fator melhor explica por que o Norte dos EUA defendia a industrialização enquanto o Sul preferia manter a exportação de algodão?</p>
           <div id="exp-quiz-opts">
-            <div class="fq-opt" role="button" tabindex="0" onclick="respExpQuiz(this,'a')">A) O Norte tinha mais recursos naturais do que o Sul e por isso podia investir em fábricas.</div>
-            <div class="fq-opt" role="button" tabindex="0" onclick="respExpQuiz(this,'b')">B) O Norte entendia que, sem trabalhadores com renda, não haveria mercado para comprar produtos industrializados, enquanto o Sul dependia do trabalho escravizado que não gerava consumo interno.</div>
-            <div class="fq-opt" role="button" tabindex="0" onclick="respExpQuiz(this,'c')">C) O Sul era contrário à industrialização por razões exclusivamente religiosas e culturais, sem relação com o modelo econômico.</div>
-            <div class="fq-opt" role="button" tabindex="0" onclick="respExpQuiz(this,'d')">D) O Norte recebia imigrantes europeus que traziam tecnologia industrial, enquanto o Sul não tinha acesso a imigrantes.</div>
+            <div class="fq-opt" role="button" tabindex="0" data-letra="a" onclick="respExpQuiz(this,'a')">A) O Norte tinha mais recursos naturais do que o Sul e por isso podia investir em fábricas.</div>
+            <div class="fq-opt" role="button" tabindex="0" data-letra="b" onclick="respExpQuiz(this,'b')">B) O Norte entendia que, sem trabalhadores com renda, não haveria mercado para comprar produtos industrializados, enquanto o Sul dependia do trabalho escravizado que não gerava consumo interno.</div>
+            <div class="fq-opt" role="button" tabindex="0" data-letra="c" onclick="respExpQuiz(this,'c')">C) O Sul era contrário à industrialização por razões exclusivamente religiosas e culturais, sem relação com o modelo econômico.</div>
+            <div class="fq-opt" role="button" tabindex="0" data-letra="d" onclick="respExpQuiz(this,'d')">D) O Norte recebia imigrantes europeus que traziam tecnologia industrial, enquanto o Sul não tinha acesso a imigrantes.</div>
           </div>
           <div class="fq-feedback" id="exp-quiz-feedback"></div>
         </div>
@@ -2150,9 +2150,10 @@ function restaurarExpTl() {
 function restaurarExpQuiz() {
   if(!S.expQuizOk) return;
   var opts = document.querySelectorAll('#exp-quiz-opts .fq-opt');
-  opts.forEach(function(o){ o.classList.add('fq-disabled'); });
-  var bOpt = document.querySelector('#exp-quiz-opts .fq-opt[onclick*="\'b\'"]');
-  if(bOpt) bOpt.classList.add('fq-correct-mark');
+  opts.forEach(function(o){
+    o.classList.add('fq-disabled');
+    if(o.getAttribute('data-letra') === 'b') o.classList.add('fq-correct-mark');
+  });
   var fb = document.getElementById('exp-quiz-feedback');
   if(fb) { fb.className='fq-feedback ok'; fb.innerHTML='✅ Já respondido! O modelo escravagista do Sul não gerava consumidores internos — essa foi uma das tensões que levou à Guerra Civil.'; fb.style.display='block'; }
 }
@@ -2173,7 +2174,7 @@ function respExpQuiz(el, letra) {
     }
   } else {
     el.classList.add('fq-wrong');
-    opts.forEach(function(o){ if(o.getAttribute('onclick').includes("'b'")) o.classList.add('fq-correct-mark'); });
+    opts.forEach(function(o){ if(o.getAttribute('data-letra') === 'b') o.classList.add('fq-correct-mark'); });
     fb.className = 'fq-feedback err';
     fb.innerHTML = '❌ A alternativa <strong>B</strong> é a mais completa: o modelo escravagista eliminava o mercado consumidor interno, enquanto o Norte precisava de trabalhadores com renda para comprar produtos industrializados.';
   }
