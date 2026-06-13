@@ -474,10 +474,10 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}#app-p
   <div class="flag-quiz-title">🚩 QUESTÃO, MARQUE A ALTERNATIVA INCORRETA</div>
   <p class="flag-quiz-q">Sobre a bandeira dos EUA e o processo de independência, assinale a afirmativa <strong>INCORRETA</strong>:</p>
   <div id="fq-opts">
-    <div class="fq-opt" role="button" tabindex="0" onclick="respFlagQuiz(this,'a')">A) As 13 listras da bandeira representam as colônias originais que declararam independência da Grã-Bretanha em 1776.</div>
-    <div class="fq-opt" role="button" tabindex="0" onclick="respFlagQuiz(this,'b')">B) O número de estrelas na bandeira atual corresponde aos 50 estados que compõem os EUA.</div>
-    <div class="fq-opt" role="button" tabindex="0" onclick="respFlagQuiz(this,'c')">C) A Grã-Bretanha reconheceu imediatamente a Declaração de Independência de 1776, assinando o tratado ainda naquele mesmo ano.</div>
-    <div class="fq-opt" role="button" tabindex="0" onclick="respFlagQuiz(this,'d')">D) A cor vermelha na bandeira representa valor e perseverança; o branco, pureza e inocência; o azul, vigilância e justiça.</div>
+    <div class="fq-opt" role="button" tabindex="0" data-letra="a" onclick="respFlagQuiz(this,'a')">A) As 13 listras da bandeira representam as colônias originais que declararam independência da Grã-Bretanha em 1776.</div>
+    <div class="fq-opt" role="button" tabindex="0" data-letra="b" onclick="respFlagQuiz(this,'b')">B) O número de estrelas na bandeira atual corresponde aos 50 estados que compõem os EUA.</div>
+    <div class="fq-opt" role="button" tabindex="0" data-letra="c" onclick="respFlagQuiz(this,'c')">C) A Grã-Bretanha reconheceu imediatamente a Declaração de Independência de 1776, assinando o tratado ainda naquele mesmo ano.</div>
+    <div class="fq-opt" role="button" tabindex="0" data-letra="d" onclick="respFlagQuiz(this,'d')">D) A cor vermelha na bandeira representa valor e perseverança; o branco, pureza e inocência; o azul, vigilância e justiça.</div>
   </div>
   <div class="fq-feedback" id="fq-feedback"></div>
 </div>
@@ -1751,10 +1751,9 @@ function _aplicarResultadoPesquisa(result, tempoGasto, resposta) {
 
 function restaurarFlagQuiz() {
   if(!S.flagQuizOk) return;
-  var opts = document.querySelectorAll('.fq-opt');
+  var opts = document.querySelectorAll('#fq-opts .fq-opt');
   opts.forEach(function(o){ o.classList.add('fq-disabled'); });
-  // C é a alternativa INCORRETA (enunciado pede a INCORRETA), então fica vermelha ao acertar
-  var cOpt = document.querySelector('.fq-opt[onclick*="\'c\'"]');
+  var cOpt = document.querySelector('#fq-opts .fq-opt[data-letra="c"]');
   if(cOpt) cOpt.classList.add('fq-wrong');
   var fb = document.getElementById('fq-feedback');
   if(fb) { fb.className='fq-feedback ok'; fb.innerHTML='✅ Já respondido! A alternativa C era a INCORRETA (reconhecimento britânico foi em 1783, não em 1776).'; fb.style.display='block'; }
@@ -2184,12 +2183,11 @@ function avancarParaDestinoManifesto() { if(!S.unlocked.includes(6))S.unlocked.p
 
 // ========== QUIZ DA BANDEIRA ==========
 function respFlagQuiz(el, letra) {
-  var opts = document.querySelectorAll('.fq-opt');
+  var opts = document.querySelectorAll('#fq-opts .fq-opt');
   opts.forEach(function(o){ o.classList.add('fq-disabled'); });
   var fb = document.getElementById('fq-feedback');
   var wrap = document.getElementById('flag-quiz-wrap');
   if(letra === 'c') {
-    // CORRETA: C é a incorreta (a Grã-Bretanha NÃO reconheceu imediatamente)
     el.classList.add('fq-wrong');
     fb.className = 'fq-feedback ok';
     fb.innerHTML = '✅ <strong>Correto!</strong> A alternativa C é a INCORRETA. O reconhecimento britânico só ocorreu em <strong>1783</strong>, após anos de guerra, não em 1776. +15 XP';
@@ -2200,9 +2198,8 @@ function respFlagQuiz(el, letra) {
       salvarLocal();
     }
   } else {
-    // Escolha errada, marca a verdadeira incorreta
     el.classList.add('fq-wrong');
-    opts.forEach(function(o){ if(o.getAttribute('onclick').includes("'c'")) o.classList.add('fq-correct-mark'); });
+    opts.forEach(function(o){ if(o.getAttribute('data-letra') === 'c') o.classList.add('fq-correct-mark'); });
     fb.className = 'fq-feedback err';
     fb.innerHTML = '❌ A alternativa <strong>C</strong> é a INCORRETA: a Grã-Bretanha só reconheceu a independência em <strong>1783</strong>, pelo Tratado de Paris, não em 1776.';
     if(wrap) wrap.classList.add('pulse');
