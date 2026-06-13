@@ -96,10 +96,10 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}#app-p
 .philo-contrib{font-size:.75rem;color:#c9a84c;margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,.1);}
 
 /* TIMELINE */
-#timeline-container{position:relative;padding:1rem 0;margin:1rem 0;}
-.tl-line{position:absolute;left:27px;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--gold),var(--crimson));}
-.timeline-item{display:flex;gap:10px;margin-bottom:9px;cursor:pointer;}
-.tl-dot{width:56px;min-width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.06);border:2.5px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:.6rem;text-align:center;}
+#timeline-container{position:relative;padding:1rem 0 1rem 0;margin:1rem 0;}
+.tl-line{position:absolute;left:27px;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--gold),var(--crimson));z-index:0;}
+.timeline-item{display:flex;gap:10px;margin-bottom:9px;cursor:pointer;align-items:flex-start;}
+.tl-dot{width:56px;min-width:56px;height:56px;border-radius:50%;background:rgba(20,30,60,.95);border:2.5px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:.6rem;text-align:center;position:relative;z-index:1;flex-shrink:0;}
 .timeline-item.revealed .tl-dot{background:var(--navy);border-color:var(--gold);}
 .tl-content{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px;}
 .tl-title{font-family:'Montserrat',sans-serif;font-size:.85rem;color:#91c7ff;display:flex;justify-content:space-between;}
@@ -292,7 +292,7 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}#app-p
 .flag-quiz-wrap{background:linear-gradient(135deg,rgba(26,42,74,.95),rgba(13,24,41,.98));border:2px solid rgba(201,168,76,.5);border-radius:14px;padding:1.2rem;margin:1.2rem 0;}
 .flag-quiz-title{font-family:'Press Start 2P',monospace;font-size:.58rem;color:#c9a84c;margin-bottom:.7rem;}
 .flag-quiz-q{font-size:.88rem;color:#d1e3f8;font-style:italic;margin-bottom:.8rem;line-height:1.6;}
-.fq-opt{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.6rem .9rem;cursor:pointer;font-size:.83rem;color:#d1e3f8;margin-bottom:.4rem;transition:all .2s;}
+.fq-opt{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.6rem .9rem;cursor:pointer;font-size:.83rem;color:#d1e3f8;margin-bottom:.4rem;transition:all .2s;touch-action:manipulation;-webkit-tap-highlight-color:rgba(145,199,255,.2);user-select:none;-webkit-user-select:none;}
 .fq-opt:hover{border-color:var(--gold);background:rgba(201,168,76,.08);}
 .fq-opt.fq-wrong{background:rgba(220,53,69,.12);border-color:rgba(220,53,69,.4);color:#ff9090;pointer-events:none;}
 .fq-opt.fq-correct-mark{background:rgba(46,204,113,.12);border-color:rgba(46,204,113,.4);color:#6effa0;pointer-events:none;}
@@ -474,10 +474,10 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}#app-p
   <div class="flag-quiz-title">🚩 QUESTÃO, MARQUE A ALTERNATIVA INCORRETA</div>
   <p class="flag-quiz-q">Sobre a bandeira dos EUA e o processo de independência, assinale a afirmativa <strong>INCORRETA</strong>:</p>
   <div id="fq-opts">
-    <div class="fq-opt" onclick="respFlagQuiz(this,'a')">A) As 13 listras da bandeira representam as colônias originais que declararam independência da Grã-Bretanha em 1776.</div>
-    <div class="fq-opt" onclick="respFlagQuiz(this,'b')">B) O número de estrelas na bandeira atual corresponde aos 50 estados que compõem os EUA.</div>
-    <div class="fq-opt" onclick="respFlagQuiz(this,'c')">C) A Grã-Bretanha reconheceu imediatamente a Declaração de Independência de 1776, assinando o tratado ainda naquele mesmo ano.</div>
-    <div class="fq-opt" onclick="respFlagQuiz(this,'d')">D) A cor vermelha na bandeira representa valor e perseverança; o branco, pureza e inocência; o azul, vigilância e justiça.</div>
+    <div class="fq-opt" role="button" tabindex="0" onclick="respFlagQuiz(this,'a')">A) As 13 listras da bandeira representam as colônias originais que declararam independência da Grã-Bretanha em 1776.</div>
+    <div class="fq-opt" role="button" tabindex="0" onclick="respFlagQuiz(this,'b')">B) O número de estrelas na bandeira atual corresponde aos 50 estados que compõem os EUA.</div>
+    <div class="fq-opt" role="button" tabindex="0" onclick="respFlagQuiz(this,'c')">C) A Grã-Bretanha reconheceu imediatamente a Declaração de Independência de 1776, assinando o tratado ainda naquele mesmo ano.</div>
+    <div class="fq-opt" role="button" tabindex="0" onclick="respFlagQuiz(this,'d')">D) A cor vermelha na bandeira representa valor e perseverança; o branco, pureza e inocência; o azul, vigilância e justiça.</div>
   </div>
   <div class="fq-feedback" id="fq-feedback"></div>
 </div>
@@ -1013,10 +1013,10 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}#app-p
           <div class="flag-quiz-title">🔎 QUESTÃO REFLEXIVA</div>
           <p class="flag-quiz-q">Com base no conteúdo estudado, qual fator melhor explica por que o Norte dos EUA defendia a industrialização enquanto o Sul preferia manter a exportação de algodão?</p>
           <div id="exp-quiz-opts">
-            <div class="fq-opt" onclick="respExpQuiz(this,'a')">A) O Norte tinha mais recursos naturais do que o Sul e por isso podia investir em fábricas.</div>
-            <div class="fq-opt" onclick="respExpQuiz(this,'b')">B) O Norte entendia que, sem trabalhadores com renda, não haveria mercado para comprar produtos industrializados, enquanto o Sul dependia do trabalho escravizado que não gerava consumo interno.</div>
-            <div class="fq-opt" onclick="respExpQuiz(this,'c')">C) O Sul era contrário à industrialização por razões exclusivamente religiosas e culturais, sem relação com o modelo econômico.</div>
-            <div class="fq-opt" onclick="respExpQuiz(this,'d')">D) O Norte recebia imigrantes europeus que traziam tecnologia industrial, enquanto o Sul não tinha acesso a imigrantes.</div>
+            <div class="fq-opt" role="button" tabindex="0" onclick="respExpQuiz(this,'a')">A) O Norte tinha mais recursos naturais do que o Sul e por isso podia investir em fábricas.</div>
+            <div class="fq-opt" role="button" tabindex="0" onclick="respExpQuiz(this,'b')">B) O Norte entendia que, sem trabalhadores com renda, não haveria mercado para comprar produtos industrializados, enquanto o Sul dependia do trabalho escravizado que não gerava consumo interno.</div>
+            <div class="fq-opt" role="button" tabindex="0" onclick="respExpQuiz(this,'c')">C) O Sul era contrário à industrialização por razões exclusivamente religiosas e culturais, sem relação com o modelo econômico.</div>
+            <div class="fq-opt" role="button" tabindex="0" onclick="respExpQuiz(this,'d')">D) O Norte recebia imigrantes europeus que traziam tecnologia industrial, enquanto o Sul não tinha acesso a imigrantes.</div>
           </div>
           <div class="fq-feedback" id="exp-quiz-feedback"></div>
         </div>
