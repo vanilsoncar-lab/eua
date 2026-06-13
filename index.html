@@ -2399,6 +2399,8 @@ function abrirResumofinal() {
   if(S.pesquisaConcluida) habilidades.push('Pesquisar e argumentar sobre os impactos históricos da Independência dos EUA no mundo');
   if(S.mapaClicado && S.mapaClicado.length >= 8) habilidades.push('Localizar e identificar as 13 colônias no mapa e seus contextos históricos');
   if(S.dmFinalizado) habilidades.push('Compreender o conceito de Destino Manifesto e a expansão territorial dos EUA');
+  if(S.flagQuizOk) habilidades.push('Interpretar símbolos nacionais e relacionar à história da Independência dos EUA');
+  if(S.expQuizOk) habilidades.push('Analisar as tensões econômicas entre Norte e Sul que levaram à Guerra Civil Americana');
   
   // O que precisa melhorar
   var melhorar = [];
@@ -2408,6 +2410,8 @@ function abrirResumofinal() {
   if(!S.checkDone || S.checkDone.length < 10) melhorar.push('Completar o checklist de aprendizagem (' + (S.checkDone||[]).length + '/10 itens)');
   if(!S.pesquisaConcluida) melhorar.push('Concluir a atividade de pesquisa sobre os impactos da Independência');
   if(!S.dmFinalizado) melhorar.push('Finalizar a atividade do Destino Manifesto');
+  if(!S.flagQuizOk) melhorar.push('Responder a questão sobre os símbolos da bandeira americana (Tela 2)');
+  if(!S.expQuizOk) melhorar.push('Responder a questão reflexiva sobre Norte vs Sul (Tela 7)');
   if(S.leituraRapida && S.leituraRapida.length > 0) melhorar.push('Dedicar mais tempo à leitura dos conteúdos (leitura rápida detectada em ' + S.leituraRapida.length + ' tela(s))');
   if(S.monitor && S.monitor.penalXpTotal > 0) melhorar.push('Manter o foco na atividade (total de ' + S.monitor.penalXpTotal + ' XP perdidos por saídas)');
   
@@ -2483,6 +2487,26 @@ function abrirResumofinal() {
       + '<span>' + ico + '</span>'
       + '<div style="flex:1;font-size:.75rem;color:#d1e3f8;">' + g.enunciado + '</div>'
       + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.5rem;color:' + cor + ';">' + g.resposta + '</div>'
+      + '</div>';
+  });
+  html += '</div></div>';
+
+  // Questões de múltipla escolha
+  html += '<div style="margin-bottom:1rem;">'
+    + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.55rem;color:#c9a84c;margin-bottom:.5rem;">📝 QUESTÕES DE MÚLTIPLA ESCOLHA</div>'
+    + '<div style="background:rgba(255,255,255,.04);border-radius:8px;overflow:hidden;">';
+
+  var questoesMC = [
+    { enunciado: 'Símbolos da bandeira americana', resposta: 'C) Incorreta (reconhecimento em 1783)', ok: S.flagQuizOk },
+    { enunciado: 'Norte industrial vs Sul escravagista', resposta: 'B) Mercado consumidor interno', ok: S.expQuizOk }
+  ];
+  questoesMC.forEach(function(q) {
+    var cor = q.ok ? '#6effa0' : '#ff9090';
+    var ico = q.ok ? '✅' : '❌';
+    html += '<div style="display:flex;align-items:center;gap:.6rem;padding:.4rem .7rem;border-bottom:1px solid rgba(255,255,255,.05);">'
+      + '<span>' + ico + '</span>'
+      + '<div style="flex:1;font-size:.75rem;color:#d1e3f8;">' + q.enunciado + '</div>'
+      + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.48rem;color:' + cor + ';">' + (q.ok ? q.resposta : 'Não respondida') + '</div>'
       + '</div>';
   });
   html += '</div></div>';
