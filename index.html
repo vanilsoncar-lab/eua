@@ -93,6 +93,10 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}#app-p
 .philosopher-card.opened .philo-back{display:block;}
 .philo-back p{font-size:.82rem;line-height:1.6;color:#d1e3f8;margin-top:5px;}
 .philo-back .philo-flag{font-size:1.6rem;margin-bottom:5px;}
+.philo-progress-wrap{margin-top:.6rem;height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+.philo-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#c9a84c,#6effa0);border-radius:4px;transition:width .25s linear;}
+.philo-progress-label{font-size:.65rem;color:rgba(255,255,255,.45);margin-top:.3rem;letter-spacing:.03em;}
+.philosopher-card.lido .philo-progress-wrap{display:none;}
 .philo-contrib{font-size:.75rem;color:#c9a84c;margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,.1);}
 
 /* TIMELINE */
@@ -1127,6 +1131,7 @@ function carregarObj(obj) {
   if(!obj) return;
   Object.assign(S, obj);
   // Garante campos novos que podem não existir em saves antigos
+  if(S.philoLeituraOk === undefined) S.philoLeituraOk = [];
   if(S.flagQuizOk === undefined) S.flagQuizOk = false;
   if(S.flagQuizTentou === undefined) S.flagQuizTentou = false;
   if(S.expQuizTentou === undefined) S.expQuizTentou = false;
@@ -1153,6 +1158,8 @@ function atualizarHUD() {
 
 function irPara(n) {
   if(S.tela && S.tela !== n) verificarLeituraAdequada(S.tela);
+  // Sair da tela dos filósofos interrompe timers de leitura não concluídos
+  if(S.tela === 1 && n !== 1 && typeof _philoZerarTodosTimers === 'function') _philoZerarTodosTimers();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   var _ns=document.getElementById('screen-'+n); if(_ns) _ns.classList.add('active');
   S.tela=n;
@@ -1182,25 +1189,106 @@ function desbloquearBtn(id, hintId, label) {
   let h=document.getElementById(hintId); if(h) h.style.display='none';
 }
 
+// ── Timers de leitura dos filósofos (10s contínuos para creditar XP) ──────
+var _philoTimers = {}; // { id: { intervalo, segundos, total } }
+
+// Calcula o tempo de leitura necessário (em segundos) com base no tamanho do texto do verso do card.
+// Fator de 0.45s por palavra, com piso de 8s e teto de 15s.
+function _philoTempoLeitura(p) {
+  var texto = (p.idea || '') + ' ' + (p.contrib || '');
+  var palavras = texto.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(8, Math.min(15, Math.round(palavras * 0.45)));
+}
+
+function _philoLimparTimer(id) {
+  if(_philoTimers[id]) { clearInterval(_philoTimers[id].intervalo); delete _philoTimers[id]; }
+}
+
+function _philoZerarTodosTimers() {
+  Object.keys(_philoTimers).forEach(function(id){
+    var total = _philoTimers[id].total;
+    _philoLimparTimer(id);
+    var bar = document.querySelector('.philosopher-card[data-philo-id="'+id+'"] .philo-progress-bar');
+    var lbl = document.querySelector('.philosopher-card[data-philo-id="'+id+'"] .philo-progress-label');
+    if(bar) bar.style.width = '0%';
+    if(lbl) lbl.textContent = 'Leia com atenção... 0s/' + total + 's';
+  });
+}
+
+function _philoIniciarTimer(id) {
+  if(S.philoLeituraOk.includes(id)) return; // já creditado, não precisa de timer
+  _philoLimparTimer(id); // garante reinício do zero
+
+  var p = PHILOSOPHERS.find(function(ph){ return ph.id === id; });
+  var total = p ? _philoTempoLeitura(p) : 10;
+
+  var seg = 0;
+  var bar = document.querySelector('.philosopher-card[data-philo-id="'+id+'"] .philo-progress-bar');
+  var lbl = document.querySelector('.philosopher-card[data-philo-id="'+id+'"] .philo-progress-label');
+  if(bar) bar.style.width = '0%';
+  if(lbl) lbl.textContent = 'Leia com atenção... 0s/' + total + 's';
+
+  _philoTimers[id] = { segundos: 0, total: total, intervalo: setInterval(function(){
+    seg++;
+    _philoTimers[id].segundos = seg;
+    var pct = Math.min(100, (seg / total) * 100);
+    if(bar) bar.style.width = pct + '%';
+    if(lbl) lbl.textContent = (seg >= total) ? '✅ Leitura registrada!' : ('Leia com atenção... ' + seg + 's/' + total + 's');
+
+    if(seg >= total) {
+      _philoLimparTimer(id);
+      if(!S.philoLeituraOk.includes(id)) {
+        S.philoLeituraOk.push(id);
+        S.xp += 20;
+        atualizarHUD();
+        salvarLocal();
+        var card = document.querySelector('.philosopher-card[data-philo-id="'+id+'"]');
+        if(card) card.classList.add('lido');
+      }
+    }
+  }, 1000) };
+}
+
 function renderPhilosophers() {
   let grid=document.getElementById('philosophers-grid');
   if(!grid) return;
-  grid.innerHTML=PHILOSOPHERS.map(p=>`<div class="philosopher-card ${S.philoAbertos.includes(p.id)?'opened':''}"><div class="philo-front"><h4>${p.name}</h4><div class="philo-flag">${p.flag}</div><div class="philo-tap">Clique para abrir</div></div><div class="philo-back"><h4>${p.name}</h4><div class="philo-flag">${p.flag} ${p.country}</div><p><strong>Ideia:</strong> ${p.idea}</p><div class="philo-contrib"><strong>📚 Contribuição:</strong> ${p.contrib}</div></div></div>`).join('');
+  grid.innerHTML=PHILOSOPHERS.map(p=>{
+    var opened = S.philoAbertos.includes(p.id);
+    var lido = S.philoLeituraOk.includes(p.id);
+    var tempoTotal = _philoTempoLeitura(p);
+    var progressHtml = lido ? '' :
+      '<div class="philo-progress-wrap"><div class="philo-progress-bar" style="width:0%"></div></div>'
+      + '<div class="philo-progress-label">Leia com atenção... 0s/' + tempoTotal + 's</div>';
+    return `<div class="philosopher-card ${opened?'opened':''} ${lido?'lido':''}" data-philo-id="${p.id}"><div class="philo-front"><h4>${p.name}</h4><div class="philo-flag">${p.flag}</div><div class="philo-tap">Clique para abrir</div></div><div class="philo-back"><h4>${p.name}</h4><div class="philo-flag">${p.flag} ${p.country}</div><p><strong>Ideia:</strong> ${p.idea}</p><div class="philo-contrib"><strong>📚 Contribuição:</strong> ${p.contrib}</div>${progressHtml}</div></div>`;
+  }).join('');
+
   grid.querySelectorAll('.philosopher-card').forEach((card,i)=>{
     card.onclick=()=>{
       let id=PHILOSOPHERS[i].id;
       if(S.philoAbertos.includes(id)) return;
       S.philoAbertos.push(id);
       card.classList.add('opened');
-      S.xp+=20;
-      atualizarHUD();
       document.getElementById('philo-counter').textContent=`${S.philoAbertos.length} de 6 filósofos`;
       if(S.philoAbertos.length===6) desbloquearBtn('btn-next-1','hint-1','Continuar');
       salvarLocal();
+      // Inicia o timer de leitura de 10s para este filósofo
+      _philoIniciarTimer(id);
     };
   });
   document.getElementById('philo-counter').textContent=`${S.philoAbertos.length} de 6 filósofos`;
+
+  // Reinicia timers de cards já abertos (mas não lidos) ao re-renderizar, ex: ao voltar à tela
+  S.philoAbertos.forEach(function(id){
+    if(!S.philoLeituraOk.includes(id)) _philoIniciarTimer(id);
+  });
 }
+
+// Interrupção: trocar de aba/minimizar zera TODOS os timers em andamento
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden) {
+    _philoZerarTodosTimers();
+  }
+});
 
 function renderTimeline() {
   let cont=document.getElementById('timeline-container');
@@ -1331,7 +1419,7 @@ function fazerCadastro() {
   if(senha.length<4){document.getElementById('msg-cadastro').textContent='Senha deve ter pelo menos 4 caracteres';return;}
   if(localStorage.getItem(CHAVE_AUTH+email.toLowerCase())){document.getElementById('msg-cadastro').textContent='E-mail já cadastrado';return;}
   try{localStorage.removeItem('oda_sessao_ativa');}catch(e){}
-  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[],flagQuizOk:false,flagQuizTentou:false,expTlAbertos:[],expQuizOk:false,expQuizTentou:false,plagioDetectado:false,bloqueioXpProximaTarefa:false};
+  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],philoLeituraOk:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[],flagQuizOk:false,flagQuizTentou:false,expTlAbertos:[],expQuizOk:false,expQuizTentou:false,plagioDetectado:false,bloqueioXpProximaTarefa:false};
   salvarLocal();
   iniciarApp();
   log('Cadastro realizado');
@@ -1793,7 +1881,7 @@ function restaurarPesquisa() {
   desbloquearBtn('btn-next-3', 'hint-3', 'Continuar');
 }
 
-function executarReinicio() { salvarHistoricoPercurso(); for(let k in S) if(!['nome','turma','email','senha','ano'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; S.pesquisaConcluida=false; S.pesquisaXp=0; S.pesquisaResposta=''; S.mapaClicado=[]; S.leituraOk={}; S.leituraRapida=[]; S.plagioDetectado=false; S.bloqueioXpProximaTarefa=false; fecharModal('modal-reinicio'); location.reload(); }
+function executarReinicio() { salvarHistoricoPercurso(); for(let k in S) if(!['nome','turma','email','senha','ano'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.philoLeituraOk=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; S.pesquisaConcluida=false; S.pesquisaXp=0; S.pesquisaResposta=''; S.mapaClicado=[]; S.leituraOk={}; S.leituraRapida=[]; S.plagioDetectado=false; S.bloqueioXpProximaTarefa=false; fecharModal('modal-reinicio'); location.reload(); }
 function verHistórico() { verHistoricoPercursos(); }
 function verPapeis() {
   let nivelAtual=getNivel(S.xp||0);
@@ -2072,7 +2160,7 @@ function carregarPainelAlunos() {
       +'<td style="padding:7px 8px;color:#aaa;">'+(a.ano||'—')+'</td>'
       +'<td style="padding:7px 8px;text-align:center;color:#80ff00;font-weight:700;">'+(a.xp||0)+'</td>'
       +'<td style="padding:7px 8px;text-align:center;">'+nv.av+' '+nv.nome+'</td>'
-      +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+((a.philoAbertos||[]).length)+'/6</td>'
+      +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+((a.philoLeituraOk||a.philoAbertos||[]).length)+'/6</td>'
       +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+((a.tlRevelados||[]).length)+'/7</td>'
       +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+((a.enigResp||[]).length)+'/4</td>'
       +'<td style="padding:7px 8px;text-align:center;color:#aaa;">'+((a.checkDone||[]).length)+'/10</td>'
@@ -2301,7 +2389,7 @@ function salvarHistoricoPercurso() {
     hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
     xp: S.xp,
     nivel: getNivel(S.xp).nome,
-    filósofos: (S.philoAbertos||[]).length,
+    filósofos: (S.philoLeituraOk||[]).length,
     eventos: (S.tlRevelados||[]).length,
     enigmas: (S.enigResp||[]).length,
     checklist: (S.checkDone||[]).length,
@@ -2409,7 +2497,7 @@ function abrirResumofinal() {
   
   // Habilidades adquiridas
   var habilidades = [];
-  if(S.philoAbertos && S.philoAbertos.length >= 4) habilidades.push('Identificar e relacionar os principais pensadores iluministas e suas contribuições');
+  if(S.philoLeituraOk && S.philoLeituraOk.length >= 4) habilidades.push('Identificar e relacionar os principais pensadores iluministas e suas contribuições');
   if(S.tlRevelados && S.tlRevelados.length >= 5) habilidades.push('Compreender a cronologia dos eventos que levaram à Independência dos EUA');
   if(S.enigResp && S.enigResp.length >= 2) habilidades.push('Analisar fontes históricas e aplicar raciocínio crítico na resolução de questões');
   if(S.checkDone && S.checkDone.length >= 7) habilidades.push('Sistematizar os conhecimentos sobre o Iluminismo e a Independência Americana');
@@ -2421,7 +2509,7 @@ function abrirResumofinal() {
   
   // O que precisa melhorar
   var melhorar = [];
-  if(!S.philoAbertos || S.philoAbertos.length < 6) melhorar.push('Explorar todos os filósofos iluministas (' + (S.philoAbertos||[]).length + '/6 abertos)');
+  if(!S.philoLeituraOk || S.philoLeituraOk.length < 6) melhorar.push('Ler com atenção todos os filósofos iluministas (' + (S.philoLeituraOk||[]).length + '/6 com leitura registrada)');
   if(!S.tlRevelados || S.tlRevelados.length < 7) melhorar.push('Explorar toda a linha do tempo (' + (S.tlRevelados||[]).length + '/7 eventos)');
   if(!S.mapaClicado || S.mapaClicado.length < 13) melhorar.push('Clicar em todas as colônias no mapa (' + (S.mapaClicado||[]).length + '/13 clicadas)');
   if(!S.checkDone || S.checkDone.length < 10) melhorar.push('Completar o checklist de aprendizagem (' + (S.checkDone||[]).length + '/10 itens)');
