@@ -1119,7 +1119,19 @@ const CHECKLIST = [
 
 function getNivel(xp) { for(let i=NIVEIS.length-1;i>=0;i--) if(xp>=NIVEIS[i].min) return NIVEIS[i]; return NIVEIS[0]; }
 function salvarLocal() { if(!S.email) return; try { localStorage.setItem(CHAVE_AUTH+S.email.toLowerCase(), JSON.stringify({...S,hist:S.hist.slice(0,50)})); showToast(); } catch(e){} }
-function carregarObj(obj) { if(obj) Object.assign(S, obj); }
+function carregarObj(obj) {
+  if(!obj) return;
+  Object.assign(S, obj);
+  // Garante campos novos que podem não existir em saves antigos
+  if(S.flagQuizOk === undefined) S.flagQuizOk = false;
+  if(S.flagQuizTentou === undefined) S.flagQuizTentou = false;
+  if(S.expQuizTentou === undefined) S.expQuizTentou = false;
+  if(S.expQuizOk === undefined) S.expQuizOk = false;
+  if(S.expTlAbertos === undefined) S.expTlAbertos = [];
+  if(S.plagioDetectado === undefined) S.plagioDetectado = false;
+  if(S.bloqueioXpProximaTarefa === undefined) S.bloqueioXpProximaTarefa = false;
+  if(S.dmFinalizado === undefined) S.dmFinalizado = false;
+}
 function log(e) { S.hist.unshift({t:new Date().toLocaleTimeString('pt-BR'),e}); if(S.hist.length>50) S.hist.pop(); salvarLocal(); }
 function showToast() { let t=document.getElementById('toast'); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
 function sndClick() { new Audio('data:audio/wav;base64,U3RlYWx0aCBzb3VuZA==').play().catch(()=>{}); }
@@ -1315,7 +1327,7 @@ function fazerCadastro() {
   if(senha.length<4){document.getElementById('msg-cadastro').textContent='Senha deve ter pelo menos 4 caracteres';return;}
   if(localStorage.getItem(CHAVE_AUTH+email.toLowerCase())){document.getElementById('msg-cadastro').textContent='E-mail já cadastrado';return;}
   try{localStorage.removeItem('oda_sessao_ativa');}catch(e){}
-  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[],flagQuizOk:false,expTlAbertos:[],expQuizOk:false,plagioDetectado:false,bloqueioXpProximaTarefa:false};
+  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[],flagQuizOk:false,flagQuizTentou:false,expTlAbertos:[],expQuizOk:false,expQuizTentou:false,plagioDetectado:false,bloqueioXpProximaTarefa:false};
   salvarLocal();
   iniciarApp();
   log('Cadastro realizado');
@@ -2167,6 +2179,7 @@ function respExpQuiz(el, letra) {
     fb.innerHTML = '✅ <strong>Correto!</strong> O modelo escravagista do Sul não gerava consumidores internos. O Norte percebeu que a industrialização só faria sentido com um mercado interno ativo, o que exigia trabalhadores assalariados. Essa foi uma das tensões centrais que levou à Guerra Civil. +20 XP';
     if(!S.expQuizOk) {
       S.expQuizOk = true;
+      S.expQuizTentou = true;
       S.xp += 20;
       atualizarHUD();
       salvarLocal();
@@ -2175,6 +2188,7 @@ function respExpQuiz(el, letra) {
     el.classList.add('fq-wrong');
     opts.forEach(function(o){ if(o.getAttribute('data-letra') === 'b') o.classList.add('fq-correct-mark'); });
     fb.className = 'fq-feedback err';
+    if(!S.expQuizTentou){ S.expQuizTentou=true; salvarLocal(); }
     fb.innerHTML = '❌ A alternativa <strong>B</strong> é a mais completa: o modelo escravagista eliminava o mercado consumidor interno, enquanto o Norte precisava de trabalhadores com renda para comprar produtos industrializados.';
   }
   fb.style.display = 'block';
@@ -2193,6 +2207,7 @@ function respFlagQuiz(el, letra) {
     fb.innerHTML = '✅ <strong>Correto!</strong> A alternativa C é a INCORRETA. O reconhecimento britânico só ocorreu em <strong>1783</strong>, após anos de guerra, não em 1776. +15 XP';
     if(!S.flagQuizOk) {
       S.flagQuizOk = true;
+      S.flagQuizTentou = true;
       S.xp += 15;
       atualizarHUD();
       salvarLocal();
@@ -2371,7 +2386,7 @@ function novaJornada() {
     pesquisaConcluida: false, pesquisaXp: 0, pesquisaResposta: '',
     checkDone: [], unlocked: [1], tela: 1, hist: [], enigResp: [],
     dmFinalizado: false, mapaClicado: [], leituraOk: {}, leituraRapida: [],
-    flagQuizOk: false, expTlAbertos: [], expQuizOk: false, plagioDetectado: false, bloqueioXpProximaTarefa: false,
+    flagQuizOk: false, flagQuizTentou: false, expTlAbertos: [], expQuizOk: false, expQuizTentou: false, plagioDetectado: false, bloqueioXpProximaTarefa: false,
     monitor: { inicioSessao: null, saidasAba: 0, tempoForaSeg: 0, saidasFullscreen: 0, penalXpTotal: 0 }
   });
   _leituraTimers = {};
@@ -2495,16 +2510,18 @@ function abrirResumofinal() {
     + '<div style="background:rgba(255,255,255,.04);border-radius:8px;overflow:hidden;">';
 
   var questoesMC = [
-    { enunciado: 'Símbolos da bandeira americana', resposta: 'C) Incorreta (reconhecimento em 1783)', ok: S.flagQuizOk },
-    { enunciado: 'Norte industrial vs Sul escravagista', resposta: 'B) Mercado consumidor interno', ok: S.expQuizOk }
+    { enunciado: 'Símbolos da bandeira americana', resposta: 'C) Incorreta (reconhecimento em 1783)', ok: S.flagQuizOk, tentou: S.flagQuizTentou },
+    { enunciado: 'Norte industrial vs Sul escravagista', resposta: 'B) Mercado consumidor interno', ok: S.expQuizOk, tentou: S.expQuizTentou }
   ];
   questoesMC.forEach(function(q) {
-    var cor = q.ok ? '#6effa0' : '#ff9090';
-    var ico = q.ok ? '✅' : '❌';
+    var ico, cor, label;
+    if(q.ok)          { ico='✅'; cor='#6effa0'; label=q.resposta; }
+    else if(q.tentou) { ico='❌'; cor='#ff9090'; label='Respondida incorretamente'; }
+    else              { ico='⬜'; cor='rgba(255,255,255,.35)'; label='Não respondida'; }
     html += '<div style="display:flex;align-items:center;gap:.6rem;padding:.4rem .7rem;border-bottom:1px solid rgba(255,255,255,.05);">'
       + '<span>' + ico + '</span>'
       + '<div style="flex:1;font-size:.75rem;color:#d1e3f8;">' + q.enunciado + '</div>'
-      + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.48rem;color:' + cor + ';">' + (q.ok ? q.resposta : 'Não respondida') + '</div>'
+      + '<div style="font-family:\'Press Start 2P\',monospace;font-size:.48rem;color:' + cor + ';">' + label + '</div>'
       + '</div>';
   });
   html += '</div></div>';
