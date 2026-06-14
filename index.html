@@ -184,6 +184,10 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}#app-p
 /* MODAIS */
 .impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:.9rem 0;}
 .impact-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.9rem;border-top:3px solid;}
+.impact-card ul{list-style:none;margin:.5rem 0 0;padding:0;display:flex;flex-direction:column;gap:.5rem;}
+.impact-card li{display:flex;align-items:flex-start;gap:.5rem;font-size:.85rem;line-height:1.4;color:#d1e3f8;}
+.impact-card li::before{content:'▸';flex-shrink:0;font-size:1rem;line-height:1.4;color:#e8cc7a;}
+.impact-card.contemporary li::before{color:#6effa0;}
 .roteiro-section{margin-bottom:1.4rem;}
 .roteiro-section-title{font-size:.92rem;color:#e8cc7a;margin-bottom:.8rem;}
 .roteiro-item{display:flex;gap:9px;margin-bottom:.6rem;}
