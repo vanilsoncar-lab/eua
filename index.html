@@ -1030,7 +1030,7 @@ body{font-family:"Open Sans",sans-serif;background:#0d0f0d;color:#f0f4ff;}#app-p
         </div>
 
         <div class="nav-btn-wrapper" style="margin-top:1.5rem;">
-          <button class="btn-continue" onclick="abrirResumofinal()">📊 Ver Resumo do Percurso</button>
+          <button class="btn-continue" onclick="_checarExpQuizAntesResumo()">📊 Ver Resumo do Percurso</button>
         </div>
 
       </div></section>
@@ -1189,39 +1189,93 @@ function desbloquearBtn(id, hintId, label) {
   let h=document.getElementById(hintId); if(h) h.style.display='none';
 }
 
-// ── Timers de leitura dos filósofos (10s contínuos para creditar XP) ──────
-var _philoTimers = {}; // { id: { intervalo, segundos, total } }
+// ── Timers de leitura dos filósofos – FILA SEQUENCIAL, 30s cada ─────────
+// Regras:
+//  1. Cada card só pode ser aberto APÓS o timer do anterior completar.
+//  2. Máximo 1 timer ativo por vez (_philoTimerAtivo controla isso).
+//  3. Tempo fixo: 30s por card.
+//  4. Bônus: após todos os 6 lidos, se ficar +15s na tela ganha 50 XP.
 
-// Calcula o tempo de leitura necessário (em segundos) com base no tamanho do texto do verso do card.
-// Fator de 0.45s por palavra, com piso de 8s e teto de 15s.
+var _philoTimers     = {};     // { id: { intervalo, segundos, total } }
+var _philoTimerAtivo = null;   // id do card com timer rodando (null = livre)
+var _philoBonusTimer = null;   // intervalo do bônus de permanência
+var _philoBonusConcedido = false;
+var _PHILO_TEMPO_FIXO = 30;
+
 function _philoTempoLeitura(p) {
-  var texto = (p.idea || '') + ' ' + (p.contrib || '');
-  var palavras = texto.trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(8, Math.min(15, Math.round(palavras * 0.45)));
+  return _PHILO_TEMPO_FIXO;
 }
 
 function _philoLimparTimer(id) {
   if(_philoTimers[id]) { clearInterval(_philoTimers[id].intervalo); delete _philoTimers[id]; }
+  if(_philoTimerAtivo === id) _philoTimerAtivo = null;
 }
 
 function _philoZerarTodosTimers() {
-  Object.keys(_philoTimers).forEach(function(id){
-    var total = _philoTimers[id].total;
-    _philoLimparTimer(id);
-    var bar = document.querySelector('.philosopher-card[data-philo-id="'+id+'"] .philo-progress-bar');
-    var lbl = document.querySelector('.philosopher-card[data-philo-id="'+id+'"] .philo-progress-label');
+  Object.keys(_philoTimers).forEach(function(k){
+    var total = _philoTimers[k].total;
+    _philoLimparTimer(k);
+    var bar = document.querySelector('.philosopher-card[data-philo-id="'+k+'"] .philo-progress-bar');
+    var lbl = document.querySelector('.philosopher-card[data-philo-id="'+k+'"] .philo-progress-label');
     if(bar) bar.style.width = '0%';
     if(lbl) lbl.textContent = 'Leia com atenção... 0s/' + total + 's';
   });
+  _philoTimerAtivo = null;
+  if(_philoBonusTimer) { clearInterval(_philoBonusTimer); _philoBonusTimer = null; }
+}
+
+// Retorna true se nenhum timer estiver rodando (aluno pode abrir próximo card)
+function _philoPodeAbrir() {
+  return _philoTimerAtivo === null;
+}
+
+function _philoIniciarBonusTimer() {
+  if(_philoBonusConcedido || _philoBonusTimer) return;
+  var segsBonus = 0;
+  _philoBonusTimer = setInterval(function(){
+    segsBonus++;
+    if(segsBonus >= 15 && !_philoBonusConcedido) {
+      _philoBonusConcedido = true;
+      clearInterval(_philoBonusTimer);
+      _philoBonusTimer = null;
+      if(!S.philoBonusPermanencia) {
+        S.philoBonusPermanencia = true;
+        S.xp += 50;
+        atualizarHUD();
+        salvarLocal();
+        _philoMostrarConquista();
+      }
+    }
+  }, 1000);
+}
+
+function _philoMostrarConquista() {
+  var modal = document.createElement('div');
+  modal.id = 'modal-philo-conquista';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.78);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;box-sizing:border-box;';
+  var div = document.createElement('div');
+  div.style.cssText = 'background:linear-gradient(135deg,#1a2a4a,#0d1829);border:2px solid #c9a84c;border-radius:16px;padding:1.5rem 1.2rem;max-width:380px;width:100%;text-align:center;';
+  div.innerHTML = '<div style="font-size:2.2rem;margin-bottom:.5rem;">&#x1F3C5;</div>'
+    + '<p style="font-weight:bold;font-size:.62rem;color:#c9a84c;margin-bottom:.7rem;letter-spacing:.04em;">CONQUISTA DESBLOQUEADA</p>'
+    + '<p style="font-weight:800;font-size:1rem;color:#6effa0;margin-bottom:.5rem;">+50 XP B&#xD4;NUS</p>'
+    + '<p style="font-size:.88rem;color:#d1e3f8;line-height:1.6;margin-bottom:1rem;">Voc&#xEA; leu com aten&#xE7;&#xE3;o todos os fil&#xF3;sofos e ficou explorando por mais tempo do que o exigido. Isso demonstra dedica&#xE7;&#xE3;o real!</p>';
+  var btn = document.createElement('button');
+  btn.textContent = 'CONTINUAR';
+  btn.style.cssText = 'background:linear-gradient(135deg,#c9a84c,#e8cc7a);color:#0d1829;border:none;border-radius:8px;padding:.55rem 1.2rem;font-size:.5rem;cursor:pointer;font-weight:bold;';
+  btn.onclick = function() { modal.remove(); };
+  div.appendChild(btn);
+  modal.appendChild(div);
+  document.body.appendChild(modal);
 }
 
 function _philoIniciarTimer(id) {
-  if(S.philoLeituraOk.includes(id)) return; // já creditado, não precisa de timer
-  _philoLimparTimer(id); // garante reinício do zero
+  if(S.philoLeituraOk.includes(id)) return;
+  // Bloqueia se outro timer já está ativo
+  if(_philoTimerAtivo !== null && _philoTimerAtivo !== id) return;
+  _philoLimparTimer(id);
+  _philoTimerAtivo = id;
 
-  var p = PHILOSOPHERS.find(function(ph){ return ph.id === id; });
-  var total = p ? _philoTempoLeitura(p) : 10;
-
+  var total = _PHILO_TEMPO_FIXO;
   var seg = 0;
   var bar = document.querySelector('.philosopher-card[data-philo-id="'+id+'"] .philo-progress-bar');
   var lbl = document.querySelector('.philosopher-card[data-philo-id="'+id+'"] .philo-progress-label');
@@ -1234,9 +1288,8 @@ function _philoIniciarTimer(id) {
     var pct = Math.min(100, (seg / total) * 100);
     if(bar) bar.style.width = pct + '%';
     if(lbl) lbl.textContent = (seg >= total) ? '✅ Leitura registrada!' : ('Leia com atenção... ' + seg + 's/' + total + 's');
-
     if(seg >= total) {
-      _philoLimparTimer(id);
+      _philoLimparTimer(id); // zera _philoTimerAtivo
       if(!S.philoLeituraOk.includes(id)) {
         S.philoLeituraOk.push(id);
         S.xp += 20;
@@ -1244,6 +1297,9 @@ function _philoIniciarTimer(id) {
         salvarLocal();
         var card = document.querySelector('.philosopher-card[data-philo-id="'+id+'"]');
         if(card) card.classList.add('lido');
+        if(S.philoLeituraOk.length >= 6 && !_philoBonusConcedido) {
+          _philoIniciarBonusTimer();
+        }
       }
     }
   }, 1000) };
@@ -1265,22 +1321,39 @@ function renderPhilosophers() {
   grid.querySelectorAll('.philosopher-card').forEach((card,i)=>{
     card.onclick=()=>{
       let id=PHILOSOPHERS[i].id;
-      if(S.philoAbertos.includes(id)) return;
+      if(S.philoAbertos.includes(id)) return; // já aberto
+      // FILA SEQUENCIAL: só permite abrir se nenhum timer estiver ativo
+      if(!_philoPodeAbrir()) {
+        card.style.transition='transform .1s';
+        card.style.transform='scale(.97)';
+        setTimeout(function(){ card.style.transform=''; }, 200);
+        return;
+      }
       S.philoAbertos.push(id);
       card.classList.add('opened');
-      document.getElementById('philo-counter').textContent=`${S.philoAbertos.length} de 6 filósofos`;
+      _atualizarPhiloCounter();
       if(S.philoAbertos.length===6) desbloquearBtn('btn-next-1','hint-1','Continuar');
       salvarLocal();
-      // Inicia o timer de leitura de 10s para este filósofo
       _philoIniciarTimer(id);
     };
   });
-  document.getElementById('philo-counter').textContent=`${S.philoAbertos.length} de 6 filósofos`;
+  _atualizarPhiloCounter();
 
-  // Reinicia timers de cards já abertos (mas não lidos) ao re-renderizar, ex: ao voltar à tela
-  S.philoAbertos.forEach(function(id){
-    if(!S.philoLeituraOk.includes(id)) _philoIniciarTimer(id);
-  });
+  // Ao re-renderizar: retoma timer SOMENTE se há exatamente 1 card aberto não lido
+  var abertosNaoLidos = S.philoAbertos.filter(function(id){ return !S.philoLeituraOk.includes(id); });
+  if(abertosNaoLidos.length === 1) {
+    _philoIniciarTimer(abertosNaoLidos[0]);
+  }
+  // Se todos lidos, verifica bônus de permanência
+  if(S.philoLeituraOk.length >= 6 && !_philoBonusConcedido && !S.philoBonusPermanencia) {
+    _philoIniciarBonusTimer();
+  }
+}
+
+function _atualizarPhiloCounter() {
+  var el = document.getElementById('philo-counter');
+  if(!el) return;
+  el.textContent = S.philoAbertos.length + ' de 6 filósofos' + (S.philoLeituraOk.length > 0 ? ' (' + S.philoLeituraOk.length + ' lidos)' : '');
 }
 
 // Interrupção: trocar de aba/minimizar zera TODOS os timers em andamento
@@ -1355,7 +1428,29 @@ function respEnigma(num, el, correta) {
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('btn-next-1')?.addEventListener('click',()=>{if(!S.unlocked.includes(2))S.unlocked.push(2); irPara(2);});
-  document.getElementById('btn-next-2')?.addEventListener('click',()=>{if(!S.unlocked.includes(3))S.unlocked.push(3); irPara(3);});
+  document.getElementById('btn-next-2')?.addEventListener('click',()=>{
+    if(!S.flagQuizOk && !S.flagQuizPenalApply) {
+      _notificarQuestaoNaoMarcada(
+        function() { // Revisar
+          _flagQuizPosNotificacao = true;
+          var wrap = document.getElementById('flag-quiz-wrap');
+          if(wrap) {
+            wrap.scrollIntoView({behavior:'smooth',block:'center'});
+            wrap.classList.add('pulse');
+            wrap.querySelectorAll('.fq-opt').forEach(function(o){ o.classList.remove('fq-disabled'); });
+          }
+        },
+        function() { // Prosseguir com penalidade
+          S.flagQuizPenalApply = true;
+          S.xp = Math.max(0, S.xp - 50);
+          atualizarHUD(); salvarLocal();
+          if(!S.unlocked.includes(3))S.unlocked.push(3); irPara(3);
+        }
+      );
+      return;
+    }
+    if(!S.unlocked.includes(3))S.unlocked.push(3); irPara(3);
+  });
   document.getElementById('btn-next-3')?.addEventListener('click',()=>{if(!S.unlocked.includes(4))S.unlocked.push(4); irPara(4);});
   // pesquisa: sem handler (handled by buttons)
   document.getElementById('check-roteiro')?.addEventListener('change',function(){ if(this.checked){ document.getElementById('conclusion-roteiro').style.display='block'; S.xp+=100; atualizarHUD(); if(!S.unlocked.includes(6))S.unlocked.push(6); atualizarMenu(); salvarLocal();}});
@@ -1419,7 +1514,7 @@ function fazerCadastro() {
   if(senha.length<4){document.getElementById('msg-cadastro').textContent='Senha deve ter pelo menos 4 caracteres';return;}
   if(localStorage.getItem(CHAVE_AUTH+email.toLowerCase())){document.getElementById('msg-cadastro').textContent='E-mail já cadastrado';return;}
   try{localStorage.removeItem('oda_sessao_ativa');}catch(e){}
-  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],philoLeituraOk:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[],flagQuizOk:false,flagQuizTentou:false,expTlAbertos:[],expQuizOk:false,expQuizTentou:false,plagioDetectado:false,bloqueioXpProximaTarefa:false};
+  S={nome,email,turma,ano,senha,xp:0,philoAbertos:[],philoLeituraOk:[],tlRevelados:[],notaOk:false,pesquisaConcluida:false,pesquisaXp:0,pesquisaResposta:'',checkDone:[],unlocked:[1],tela:1,hist:[],enigResp:[],mapaClicado:[],leituraOk:{},leituraRapida:[],flagQuizOk:false,flagQuizTentou:false,expTlAbertos:[],expQuizOk:false,expQuizTentou:false,plagioDetectado:false,bloqueioXpProximaTarefa:false,philoBonusPermanencia:false,flagQuizPenalApply:false,expQuizPenalApply:false};
   salvarLocal();
   iniciarApp();
   log('Cadastro realizado');
@@ -1881,7 +1976,7 @@ function restaurarPesquisa() {
   desbloquearBtn('btn-next-3', 'hint-3', 'Continuar');
 }
 
-function executarReinicio() { salvarHistoricoPercurso(); for(let k in S) if(!['nome','turma','email','senha','ano'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.philoLeituraOk=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; S.pesquisaConcluida=false; S.pesquisaXp=0; S.pesquisaResposta=''; S.mapaClicado=[]; S.leituraOk={}; S.leituraRapida=[]; S.plagioDetectado=false; S.bloqueioXpProximaTarefa=false; fecharModal('modal-reinicio'); location.reload(); }
+function executarReinicio() { salvarHistoricoPercurso(); for(let k in S) if(!['nome','turma','email','senha','ano'].includes(k)) S[k]=Array.isArray(S[k])?[]:0; S.unlocked=[1]; S.tela=1; S.xp=0; S.philoAbertos=[]; S.philoLeituraOk=[]; S.tlRevelados=[]; S.checkDone=[]; S.enigResp=[]; S.notaOk=false; S.pesquisaConcluida=false; S.pesquisaXp=0; S.pesquisaResposta=''; S.mapaClicado=[]; S.leituraOk={}; S.leituraRapida=[]; S.plagioDetectado=false; S.bloqueioXpProximaTarefa=false; S.philoBonusPermanencia=false; S.flagQuizPenalApply=false; S.expQuizPenalApply=false; _philoBonusConcedido=false; _flagQuizPosNotificacao=false; _expQuizPosNotificacao=false; fecharModal('modal-reinicio'); location.reload(); }
 function verHistórico() { verHistoricoPercursos(); }
 function verPapeis() {
   let nivelAtual=getNivel(S.xp||0);
@@ -2267,12 +2362,14 @@ function respExpQuiz(el, letra) {
   var fb = document.getElementById('exp-quiz-feedback');
   if(letra === 'b') {
     el.classList.add('fq-correct-mark');
+    var xpExpGanho = _expQuizPosNotificacao ? Math.round(20 * 0.7) : 20; // 70% = 14 XP
+    var msgExpExtra = _expQuizPosNotificacao ? ' <span style="color:#ffb347;font-size:.85em;">(70% por responder após aviso)</span>' : '';
     fb.className = 'fq-feedback ok';
-    fb.innerHTML = '✅ <strong>Correto!</strong> O modelo escravagista do Sul não gerava consumidores internos. O Norte percebeu que a industrialização só faria sentido com um mercado interno ativo, o que exigia trabalhadores assalariados. Essa foi uma das tensões centrais que levou à Guerra Civil. +20 XP';
+    fb.innerHTML = '✅ <strong>Correto!</strong> O modelo escravagista do Sul não gerava consumidores internos. O Norte percebeu que a industrialização só faria sentido com um mercado interno ativo, o que exigia trabalhadores assalariados. Essa foi uma das tensões centrais que levou à Guerra Civil. +' + xpExpGanho + ' XP' + msgExpExtra;
     if(!S.expQuizOk) {
       S.expQuizOk = true;
       S.expQuizTentou = true;
-      S.xp += 20;
+      S.xp += xpExpGanho;
       atualizarHUD();
       salvarLocal();
     }
@@ -2280,8 +2377,14 @@ function respExpQuiz(el, letra) {
     el.classList.add('fq-wrong');
     opts.forEach(function(o){ if(o.getAttribute('data-letra') === 'b') o.classList.add('fq-correct-mark'); });
     fb.className = 'fq-feedback err';
+    var msgExpErro = '❌ A alternativa <strong>B</strong> é a mais completa: o modelo escravagista eliminava o mercado consumidor interno, enquanto o Norte precisava de trabalhadores com renda para comprar produtos industrializados.';
+    if(_expQuizPosNotificacao && !S.expQuizTentou) {
+      S.xp = Math.max(0, S.xp - 25);
+      msgExpErro += ' <span style="color:#ff6060;"> −25 XP por ter esquecido de marcar.</span>';
+      atualizarHUD(); salvarLocal();
+    }
     if(!S.expQuizTentou){ S.expQuizTentou=true; salvarLocal(); }
-    fb.innerHTML = '❌ A alternativa <strong>B</strong> é a mais completa: o modelo escravagista eliminava o mercado consumidor interno, enquanto o Norte precisava de trabalhadores com renda para comprar produtos industrializados.';
+    fb.innerHTML = msgExpErro;
   }
   fb.style.display = 'block';
 }
@@ -2295,12 +2398,14 @@ function respFlagQuiz(el, letra) {
   var wrap = document.getElementById('flag-quiz-wrap');
   if(letra === 'c') {
     el.classList.add('fq-wrong');
+    var xpGanho = _flagQuizPosNotificacao ? Math.round(15 * 0.7) : 15; // 70% = 11 XP
+    var msgExtra = _flagQuizPosNotificacao ? ' <span style="color:#ffb347;font-size:.85em;">(70% por responder após aviso)</span>' : '';
     fb.className = 'fq-feedback ok';
-    fb.innerHTML = '✅ <strong>Correto!</strong> A alternativa C é a INCORRETA. O reconhecimento britânico só ocorreu em <strong>1783</strong>, após anos de guerra, não em 1776. +15 XP';
+    fb.innerHTML = '✅ <strong>Correto!</strong> A alternativa C é a INCORRETA. O reconhecimento britânico só ocorreu em <strong>1783</strong>, após anos de guerra, não em 1776. +' + xpGanho + ' XP' + msgExtra;
     if(!S.flagQuizOk) {
       S.flagQuizOk = true;
       S.flagQuizTentou = true;
-      S.xp += 15;
+      S.xp += xpGanho;
       atualizarHUD();
       salvarLocal();
     }
@@ -2308,7 +2413,14 @@ function respFlagQuiz(el, letra) {
     el.classList.add('fq-wrong');
     opts.forEach(function(o){ if(o.getAttribute('data-letra') === 'c') o.classList.add('fq-correct-mark'); });
     fb.className = 'fq-feedback err';
-    fb.innerHTML = '❌ A alternativa <strong>C</strong> é a INCORRETA: a Grã-Bretanha só reconheceu a independência em <strong>1783</strong>, pelo Tratado de Paris, não em 1776.';
+    var msgErro = '❌ A alternativa <strong>C</strong> é a INCORRETA: a Grã-Bretanha só reconheceu a independência em <strong>1783</strong>, pelo Tratado de Paris, não em 1776.';
+    if(_flagQuizPosNotificacao && !S.flagQuizTentou) {
+      S.xp = Math.max(0, S.xp - 25);
+      msgErro += ' <span style="color:#ff6060;"> −25 XP por ter esquecido de marcar.</span>';
+      atualizarHUD(); salvarLocal();
+    }
+    if(!S.flagQuizTentou) S.flagQuizTentou = true;
+    fb.innerHTML = msgErro;
     if(wrap) wrap.classList.add('pulse');
   }
   fb.style.display = 'block';
@@ -2478,7 +2590,7 @@ function novaJornada() {
     pesquisaConcluida: false, pesquisaXp: 0, pesquisaResposta: '',
     checkDone: [], unlocked: [1], tela: 1, hist: [], enigResp: [],
     dmFinalizado: false, mapaClicado: [], leituraOk: {}, leituraRapida: [],
-    flagQuizOk: false, flagQuizTentou: false, expTlAbertos: [], expQuizOk: false, expQuizTentou: false, plagioDetectado: false, bloqueioXpProximaTarefa: false,
+    flagQuizOk: false, flagQuizTentou: false, expTlAbertos: [], expQuizOk: false, expQuizTentou: false, plagioDetectado: false, bloqueioXpProximaTarefa: false, philoBonusPermanencia: false, flagQuizPenalApply: false, expQuizPenalApply: false,
     monitor: { inicioSessao: null, saidasAba: 0, tempoForaSeg: 0, saidasFullscreen: 0, penalXpTotal: 0 }
   });
   _leituraTimers = {};
@@ -2492,6 +2604,69 @@ function confirmarNovaJornada() {
 }
 
 // ==================== RESUMO FINAL DO PERCURSO ====================
+// ── Controle pós-notificação de quiz não marcado ────────────────────────
+var _flagQuizPosNotificacao = false;
+var _expQuizPosNotificacao  = false;
+
+function _notificarQuestaoNaoMarcada(cbRevisar, cbProsseguir) {
+  var overlay = document.createElement('div');
+  overlay.id = 'modal-quiz-nao-marcado';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;box-sizing:border-box;';
+  var box = document.createElement('div');
+  box.style.cssText = 'background:linear-gradient(135deg,#1a2a4a,#0d1829);border:2px solid #c9a84c;border-radius:16px;padding:1.5rem 1.2rem;max-width:400px;width:100%;text-align:center;';
+  var ico = document.createElement('div');
+  ico.style.cssText = 'font-size:2rem;margin-bottom:.5rem;';
+  ico.textContent = '⚠️';
+  var titulo = document.createElement('p');
+  titulo.style.cssText = 'font-weight:bold;font-size:.62rem;color:#e8cc7a;margin-bottom:.7rem;letter-spacing:.04em;';
+  titulo.textContent = 'QUESTÃO NÃO RESPONDIDA';
+  var msg1 = document.createElement('p');
+  msg1.style.cssText = 'font-size:.88rem;color:#d1e3f8;line-height:1.6;margin-bottom:.5rem;';
+  msg1.textContent = 'Você não marcou a questão objetiva desta tela.';
+  var msg2 = document.createElement('p');
+  msg2.style.cssText = 'font-size:.82rem;color:#ffb347;line-height:1.5;margin-bottom:1.1rem;';
+  msg2.innerHTML = 'Se <strong>revisar e acertar</strong>, ganha 70% da pontuação.<br>Se <strong>revisar e errar</strong>, perde 25 XP.<br>Se <strong>prosseguir sem marcar</strong>, perde 50 XP agora.';
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;flex-direction:column;gap:.5rem;';
+  var btnR = document.createElement('button');
+  btnR.style.cssText = 'background:linear-gradient(135deg,#c9a84c,#e8cc7a);color:#0d1829;border:none;border-radius:8px;padding:.55rem 1rem;font-size:.52rem;cursor:pointer;font-weight:bold;';
+  btnR.textContent = '↩ REVISAR A QUESTÃO';
+  var btnP = document.createElement('button');
+  btnP.style.cssText = 'background:rgba(255,100,100,.15);color:#ff9090;border:1px solid rgba(255,100,100,.3);border-radius:8px;padding:.5rem 1rem;font-size:.46rem;cursor:pointer;margin-top:.2rem;';
+  btnP.textContent = '⚠ PROSSEGUIR (−50 XP)';
+  btnRow.appendChild(btnR);
+  btnRow.appendChild(btnP);
+  box.appendChild(ico); box.appendChild(titulo); box.appendChild(msg1);
+  box.appendChild(msg2); box.appendChild(btnRow);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  btnR.onclick = function() { overlay.remove(); if(cbRevisar) cbRevisar(); };
+  btnP.onclick = function() { overlay.remove(); if(cbProsseguir) cbProsseguir(); };
+}
+
+function _checarExpQuizAntesResumo() {
+  if(!S.expQuizOk && !S.expQuizPenalApply) {
+    _notificarQuestaoNaoMarcada(
+      function() { // Revisar
+        _expQuizPosNotificacao = true;
+        var wrap = document.getElementById('exp-quiz-wrap');
+        if(wrap) {
+          wrap.scrollIntoView({behavior:'smooth',block:'center'});
+          wrap.querySelectorAll('.fq-opt').forEach(function(o){ o.classList.remove('fq-disabled'); });
+        }
+      },
+      function() { // Prosseguir
+        S.expQuizPenalApply = true;
+        S.xp = Math.max(0, S.xp - 50);
+        atualizarHUD(); salvarLocal();
+        abrirResumofinal();
+      }
+    );
+  } else {
+    abrirResumofinal();
+  }
+}
+
 function abrirResumofinal() {
   var nivel = getNivel(S.xp);
   
